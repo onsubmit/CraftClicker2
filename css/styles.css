@@ -1,0 +1,77 @@
+html {
+    min-height: 100%;
+    position: relative
+}
+
+body {
+  font-family: georgia, arial, helvetica, sans-serif;
+  font-size: 0.9em;
+  line-height: 1.3em;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #aaa;  
+}
+
+h1, h2, h3, h4, h5, h6, p {
+  padding: 0;
+  margin: 0 0 6px 0;
+}
+
+#inventoryContainer {
+  float: left;
+  width: 350px;
+  height: 100%;
+}
+
+#middle {
+  padding: 0px 150px 0px 150px;
+  margin: 0;
+  height: 100%;
+}
+
+#world {
+  height: calc(100% - 20px);
+  padding: 10px;
+  overflow: auto;
+}
+
+#world table
+{
+  empty-cells: show;
+  border-spacing: 1px;
+  border-collapse: separate;
+}
+
+#world td {
+	padding: 0px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  text-align: center;
+  background: url('../images/World.png');
+}
+
+#world td.coords {
+  font-size: 0.8em;
+  background: none;
+}
+
+#itemsContainer {
+  float: right;
+  width: 350px;
+  height: 100%;
+}
+
+.window {
+  border-top: 3px solid #fff;
+  border-left: 3px solid #fff;
+  border-bottom: 3px solid #333;
+  border-right: 3px solid #333;
+  background-color: #c6c6c6;
+  box-shadow: 4px 4px 8px #666;
+  height: calc(100% - 50px);
+  margin: 10px;
+  padding: 12px;
+}
