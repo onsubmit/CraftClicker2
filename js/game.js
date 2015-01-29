@@ -3,7 +3,7 @@ var Game = Class.define(
   ctor: function(oArgs)
   {
     this.player = new Player();
-    this.worldSize = { rows: 30, cols: 35};
+    this.worldSize = { rows: 3, cols: 3};
   },
   methods:
   {
