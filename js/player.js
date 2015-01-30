@@ -6,12 +6,23 @@ var Player = Class.define(
     this.maxLevel = 2;
     this.xp   = 0;
     this.xpMax = 20;
+    this.vector = { row: 1, col: 1};
     this.speed = 200; // Number of milliseconds it takes to move one square
     
     this.inventory = new Inventory();
   },
   methods:
   {
+    setPosition: function(row, col)
+    {
+      this.vector.row = row;
+      this.vector.col = col;
+    },
+    setDestination: function(row, col)
+    {
+      this.vector.destRow = row;
+      this.vector.destCol = col;
+    },
     levelUp: function()
     {
       this.level++;

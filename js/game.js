@@ -2,13 +2,23 @@ var Game = Class.define(
 {
   ctor: function(oArgs)
   {
+    this._minAnimationDuration = 25;
     this.player = new Player();
     this.worldSize = { rows: 3, cols: 3};
   },
   methods:
   {
+    getWorldCell: function(row, col)
+    {
+      return $("td[data-pos='" + row + "," + col + "']");
+    },
+    getPlayer: function()
+    {
+      return $("#player");
+    },
     drawWorld: function(numRows, numCols)
     {
+      var self = this;
       var $table = $("#grid");
       for (var row = 0; row <= numRows; row++)
       {
@@ -19,11 +29,11 @@ var Game = Class.define(
           if (row > 0 && col > 0)
           {
             // World cell
-            var self = this;
             $td.attr("data-pos", row + "," + col);
             $td.click({ row: row, col: col }, function(e)
             {
-              self.movePlayer(e.data.row, e.data.col, 200);
+              self.player.setDestination(e.data.row, e.data.col);
+              self.movePlayer();
             });
           }
           else if (row === 0 & col > 0)
@@ -50,116 +60,62 @@ var Game = Class.define(
       
       return this;
     },
-    getWorldCell: function(row, col)
+    createPlayer: function(row, col, complete)
     {
-      return $("td[data-pos='" + row + "," + col + "']");
-    },
-    getPlayer: function()
-    {
-      return $("#player");
-    },
-    getPlayerPosition: function()
-    {
-      var $player = this.getPlayer();
-      if ($player.length)
+      var $player = $("<img/>",
       {
-        var sPos = $player.attr("data-pos");
-        var arrSplit = sPos.split(",");
-        return { row: parseInt(arrSplit[0]), col: parseInt(arrSplit[1]) };
+        id: "player",
+        src: "images/Player.png",
+      }).attr("data-pos", row + "," + col);
+
+      this.player.setPosition(row, col);
+      var $worldCell = this.getWorldCell(row, col);
+      if (this.player.speed < this._minAnimationDuration)
+      {
+        $worldCell.append($player);
+      }
+      else
+      {
+        $worldCell.append($player.fadeIn(this.player.speed, complete));
       }
       
-      throw new Error("Player doesn't exist yet, dummy.");
+      return $player;
     },
-    getDistanceBetweenCells: function(oPos1, oPos2)
+    movePlayer: function()
     {
-      return Math.min(Math.abs(oPos1.row - oPos2.row), Math.abs(oPos1.col - oPos2.col));
-    },
-    movePlayer: function(row, col, duration)
-    {
-
-      var $player = this.getPlayer();
-      if (!$player.length)
-      {
-        $player = $("<img/>",
-        {
-          id: "player",
-          src: "images/Player.png",
-        }).attr("data-pos", row + "," + col);
-        
-        this.getWorldCell(row, col).append($player.fadeIn());
-        return this;
-      }
-
       var self = this;
+      var $player = this.getPlayer();
       (function step()
       {
         // Repeat until destination is reached
-        var oPos = self.getPlayerPosition();
-        if (oPos.row !== row || oPos.col !== col)
+        var oVector = self.player.vector;
+        var row = oVector.row;
+        var col = oVector.col;
+        var destRow = oVector.destRow;
+        var destCol = oVector.destCol;
+        if (row !== destRow || col !== destCol)
         {
           // Player can move in all 8 directions
-          if (oPos.row < row) oPos.row += 1;
-          if (oPos.row > row) oPos.row -= 1;
-          if (oPos.col < col) oPos.col += 1;
-          if (oPos.col > col) oPos.col -= 1;
+          if (row < destRow) row += 1;
+          if (row > destRow) row -= 1;
+          if (col < destCol) col += 1;
+          if (col > destCol) col -= 1;
 
-          duration = self.player.speed || 1;
-          $player.fadeOutAndRemove(duration, function()
+          if (self.player.speed < this._minAnimationDuration)
           {
-            $player = $("<img/>",
+            $player.remove();
+            $player = self.createPlayer(row, col);
+            step();
+          }
+          else
+          {
+            $player.fadeOutAndRemove(self.player.speed, function()
             {
-              id: "player",
-              src: "images/Player.png",
-            }).attr("data-pos", oPos.row + "," + oPos.col);
-
-            self.getWorldCell(oPos.row, oPos.col).append($player.fadeIn(duration, function()
-            {
-              step();
-            }));
-          });
-        }
-        else
-        {
-          moveQueue.shift();
-          self.processMoveQueue();
+              $player = self.createPlayer(row, col, function() { step(); });
+            });
+          }
         }
       })();
-    },
-    shiftPlayer: function(east, south, newPos)
-    {
-      var oPos = this.getPlayerPosition();
-      var newRow = Math.max(1, Math.min(this.worldSize.rows, oPos.row + south));
-      var newCol = Math.max(1, Math.min(this.worldSize.cols, oPos.col + east));
-      this.movePlayer(newRow, newCol);
-      newPos = [newRow, newCol];
-      return this;
-    },
-    processMoveQueue: function()
-    {
-      if (moveQueue.length)
-      {
-        var key = moveQueue[0];
-        if (key == 37)
-        {
-          // left
-          game.shiftPlayer(-1, 0);
-        }
-        else if (key == 38)
-        {
-          // up
-          game.shiftPlayer(0, -1);
-        }
-        else if (key == 39)
-        {
-          // right
-          game.shiftPlayer(1, 0);
-        }
-        else if (key == 40)
-        {
-          // down
-          game.shiftPlayer(0, 1);
-        }
-      }
     },
     drawItems: function()
     {
@@ -177,24 +133,8 @@ var Game = Class.define(
 
 var game = new Game();
 
-$(document).ready(function() {
-  game.drawWorld(game.worldSize.rows, game.worldSize.cols).movePlayer(1, 1);
-  game.drawItems();
-});
-
-var keys = {};
-var moveQueue = [];
-$(document).keydown(function(e)
+$(document).ready(function()
 {
-  e = e || event;
-  var bProcess = !moveQueue.length;
-  if (e.keyCode >= 37 && e.keyCode <= 40)
-  {
-    moveQueue.push([e.keyCode]);
-  }
-
-  if (bProcess)
-  {
-    game.processMoveQueue();
-  }
+  game.drawWorld(game.worldSize.rows, game.worldSize.cols).createPlayer(1, 1);
+  game.drawItems();
 });
