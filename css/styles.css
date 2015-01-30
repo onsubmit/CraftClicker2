@@ -49,7 +49,7 @@ h1, h2, h3, h4, h5, h6, p {
   height: 32px;
   min-width: 32px;
   min-height: 32px;
-  text-align: center;
+  vertical-align: top;
   background: url('../images/World.png');
 }
 
@@ -58,10 +58,29 @@ h1, h2, h3, h4, h5, h6, p {
   background: none;
 }
 
+#player {
+  position: absolute;
+  z-index: 2;
+}
+
+.layer {
+  position: relative;
+  z-index: 1;
+}
+
+.layer img {
+  width: 4px;
+  height: 4px;
+}
+
 #itemsContainer {
   float: right;
   width: 350px;
   height: 100%;
+}
+
+img.item {
+  margin: 4px;
 }
 
 .window {

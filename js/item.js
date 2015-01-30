@@ -1,16 +1,14 @@
-var Item = Class.define(
+Item = function(oArgs)
 {
-  ctor: function(oArgs)
+  this.name = oArgs.name;
+  this.id = oArgs.id;
+  this.recipe = oArgs.recipe;
+};
+
+$.extend(Item.prototype,
+{
+  toString: function()
   {
-    this.name = oArgs.name;
-    this.id = oArgs.id;
-    this.recipe = oArgs.recipe;
-  },
-  methods:
-  {
-    toString: function()
-    {
-      return this.name;
-    }
+    return this.name;
   }
 });

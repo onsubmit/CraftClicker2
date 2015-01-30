@@ -1,15 +1,12 @@
-var Inventory = Class.define(
+function Inventory(oArgs)
 {
-  ctor: function(oArgs)
-  {
-    this.items = {};
-  },
-  methods:
-  {
+  this.items = {};
+}
 
-    toString: function()
-    {
-      return "";
-    }
+$.extend(Inventory.prototype,
+{
+  toString: function()
+  {
+    return "";
   }
 });

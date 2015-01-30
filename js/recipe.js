@@ -1,8 +1,5 @@
-var Recipe = Class.define(
+Recipe = function(oArgs)
 {
-  ctor: function(oArgs)
-  {
-    this.ingredients = oArgs.ingredients; // Can be undefined
-    this.makes = oArgs.makes || 1;
-  }
-});
+  this.ingredients = oArgs.ingredients; // Can be undefined
+  this.makes = oArgs.makes || 1;
+}

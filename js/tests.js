@@ -1,10 +1,9 @@
-var Tests = Class.define(
+Tests = function() { }
+
+$.extend(Tests,
 {
-  statics:
+  assertUniqueIds: (function()
   {
-    assertUniqueIds: (function()
-    {
-      
-    })()
-  }
+    
+  })()
 });
