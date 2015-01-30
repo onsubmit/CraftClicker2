@@ -11,7 +11,7 @@ Layer = function(oArgs)
       self.squares[row] = new Array(Layer._cols);
       for (var col = 0; col < Layer._cols; col++)
       {
-        var objResource;
+        var objResource = null;
         for (var i = 0, length = Layer._oreProbabilities.length; i < length; i++)
         {
           var ore = Layer._oreProbabilities[i];
