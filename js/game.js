@@ -1,8 +1,8 @@
 function Game(oArgs)
 {
-  this._minAnimationDuration = 25;
+  this._minAnimationDuration = 1;
   this.player = new Player();
-  this.world = new World({ rows: 3, cols: 3});
+  this.world = new World({ rows: 4, cols: 4});
 }
 
 $.extend(Game.prototype,
@@ -20,31 +20,30 @@ $.extend(Game.prototype,
       var $tr = $("<tr />");       
       for (var col = 0; col <= numCols; col++)
       {
-        var $td = $("<td />");
+        var $td = $("<td />").attr("data-pos", row + "," + col);
         if (row > 0 && col > 0)
         {
           // World cell
-          $td.attr("data-pos", row + "," + col);
           $td.click({ row: row, col: col }, function(e)
           {
+            self.world.unhighlightCell().highlightCell(e.data.row, e.data.col);
             self.player.setDestination(e.data.row, e.data.col);
             self.movePlayer();
           });
         }
-        else if (row === 0 & col > 0)
-        {
-          // Column header
-          $td.addClass("coords").text(col);
-        }
-        else if (col === 0 & row > 0)
-        {
-          // Row header
-          $td.addClass("coords").text(row);
-        }
         else
         {
-          // Top-left corner -- empty
-          $td.css("empty-cells", "hide");
+          $td.addClass("coords");
+          if (row === 0 && col > 0)
+          {
+            // Column header
+            $td.text(col);
+          }
+          else if (col === 0 && row > 0)
+          {
+            // Row header
+            $td.text(row);
+          }
         }
         
         $td.appendTo($tr);
@@ -65,15 +64,8 @@ $.extend(Game.prototype,
 
     this.player.setPosition(row, col);
     var $worldCell = this.world.getCell(row, col);
-    if (this.player.speed < this._minAnimationDuration)
-    {
-      $worldCell.append($player);
-    }
-    else
-    {
-      $worldCell.append($player.fadeIn(this.player.speed, complete));
-    }
-    
+    $worldCell.append($player.fadeIn(Math.max(this.player.speed, this._minAnimationDuration), complete));
+    this.world.activateCoord(0, col).activateCoord(row, 0);
     return $player;
   },
   movePlayer: function()
@@ -88,27 +80,32 @@ $.extend(Game.prototype,
       var col = oVector.col;
       var destRow = oVector.destRow;
       var destCol = oVector.destCol;
-      if (row !== destRow || col !== destCol)
+
+      var fMoveRequired = false;
+      if (col !== destCol)
+      {
+        fMoveRequired = true;
+        self.world.deactivateCoord(0, col);
+      }
+
+      if (row !== destRow)
+      {
+        fMoveRequired = true;
+        self.world.deactivateCoord(row, 0);
+      }
+
+      if (fMoveRequired)
       {
         // Player can move in all 8 directions
         if (row < destRow) row += 1;
         if (row > destRow) row -= 1;
         if (col < destCol) col += 1;
         if (col > destCol) col -= 1;
-
-        if (self.player.speed < this._minAnimationDuration)
+        
+        $player.fadeOutAndRemove(Math.max(self.player.speed, this._minAnimationDuration), function()
         {
-          $player.remove();
-          $player = self.createPlayer(row, col);
-          step();
-        }
-        else
-        {
-          $player.fadeOutAndRemove(self.player.speed, function()
-          {
-            $player = self.createPlayer(row, col, function() { step(); });
-          });
-        }
+          $player = self.createPlayer(row, col, function() { step(); });
+        });
       }
     })();
   },
@@ -132,5 +129,6 @@ var game = new Game();
 $(document).ready(function()
 {
   game.drawWorld(game.world.size.rows, game.world.size.cols).createPlayer(1, 1);
+  game.world.highlightCell(1, 1);
   game.drawItems();
 });

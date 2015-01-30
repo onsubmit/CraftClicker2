@@ -29,6 +29,30 @@ $.extend(World.prototype,
   {
     return $("td[data-pos='" + row + "," + col + "']");
   },
+  getHighlightedCell: function()
+  {
+    return $("td.highlight");
+  },
+  highlightCell: function(row, col)
+  {
+    this.getCell(row, col).addClass("highlight");
+    return this;
+  },
+  unhighlightCell: function()
+  {
+    this.getHighlightedCell().removeClass("highlight");
+    return this;
+  },
+  activateCoord: function(row, col)
+  {
+    this.getCell(row, col).addClass("active");
+    return this;
+  },
+  deactivateCoord: function(row, col)
+  {
+    this.getCell(row, col).removeClass("active");
+    return this;
+  },
   toString: function()
   {
     return "";
