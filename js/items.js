@@ -36,10 +36,32 @@ $.extend(Items,
   }
 });
 
-Items.add({ name: "Stone" });
+Items.add(
+{
+  name: "Grass",
+  hardness: 1
+});
+
+Items.add(
+{
+  name: "Stone",
+  hardness: 4
+});
+
 Items.add({ name: "Wood" });
-Items.add({ name: "Coal Ore" });
-Items.add({ name: "Iron Ore" });
+
+Items.add(
+{
+  name: "Coal Ore",
+  hardness: 6
+});
+
+Items.add(
+{
+  name: "Iron Ore",
+  hardness: 8
+});
+
 Items.add(
 {
   name: "Wood Plank",

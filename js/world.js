@@ -12,7 +12,7 @@ World = function(oArgs)
       for (var col = 0, cols = arrRow.length; col < cols; col++)
       {
         arrRow[col] = new Tile();
-        arrRow[col].generate(30);
+        arrRow[col].generate(0);
       }
     }
   })();
@@ -23,11 +23,15 @@ $.extend(World.prototype,
   drawTile: function(row, col)
   {
     var objTile = this.tiles[row][col];
-    this.getCell(row, col).append(objTile.generate());
+    objTile.draw();
   },
   get: function()
   {
     return $("#grid");
+  },
+  getContainer: function()
+  {
+    return $("#gridContainer");
   },
   getCell: function(row, col)
   {

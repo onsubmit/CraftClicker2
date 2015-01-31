@@ -11,8 +11,21 @@ $.extend(Game.prototype,
   {
     return $("#player");
   },
-  getTile: function() {
-    return $("#tile");
+  getTile: function()
+  {
+    return $("#tileContainer");
+  },
+  getZoomIn: function()
+  {
+    return $("#zoomIn");
+  },
+  getZoomOut: function()
+  {
+    return $("#zoomOut");
+  },
+  getGather: function()
+  {
+    return $("#gather");
   },
   drawWorld: function(numRows, numCols)
   {
@@ -32,16 +45,6 @@ $.extend(Game.prototype,
             self.world.unhighlightCell().highlightCell(e.data.row, e.data.col);
             self.player.setDestination(e.data.row, e.data.col);
             self.movePlayer();
-          }).dblclickEx(eventData, function(e)
-          {
-            if (self.player.vector.row === e.data.row && self.player.vector.col == e.data.col)
-            {
-              self.zoomIn(e.data.row, e.data.col);
-            }
-            else
-            {
-              self._fPendingZoom = true;
-            }
           });
         }
         else
@@ -67,17 +70,17 @@ $.extend(Game.prototype,
     
     return this;
   },
-  zoomIn: function(row, col, self)
+  zoomIn: function()
   {
-    self = self || this;
-    var $tile = self.getTile();
-    $tile.text(row + ", " + col);
-    self.world.get().fadeOut("fast", function() { self.getTile().fadeIn("fast"); });
+    var self = this;
+    this.world.getContainer().fadeOut("fast", function() { self.getTile().fadeIn("fast"); });
+    return this;
   },
-  zoomOut: function(self)
+  zoomOut: function()
   {
-    self = self || this;
-    self.getTile().fadeOut("fast", function() { self.world.get().fadeIn("fast"); });
+    var self = this;
+    this.getTile().fadeOut("fast", function() { self.world.getContainer().fadeIn("fast"); });
+    return this;
   },
   createPlayer: function(row, col, complete)
   {
@@ -97,6 +100,7 @@ $.extend(Game.prototype,
   {
     var self = this;
     var $player = this.getPlayer();
+    self.getZoomIn().disable();
     (function step()
     {
       // Repeat until destination is reached
@@ -132,12 +136,15 @@ $.extend(Game.prototype,
           $player = self.createPlayer(row, col, function() { step(); });
         });
       }
-      else if (self._fPendingZoom)
+      else
       {
-        self.zoomIn(row, col);
-        self._fPendingZoom = false;
+        self.getZoomIn().enable();
       }
     })();
+  },
+  gather: function()
+  {
+    this.player.gather();
   },
   drawItems: function()
   {
@@ -161,5 +168,8 @@ $(document).ready(function()
   game.drawWorld(game.world.size.rows, game.world.size.cols).createPlayer(1, 1);
   game.world.highlightCell(1, 1);
   game.drawItems();
-  game.getTile().dblclickEx(game, function(e) { game.zoomOut(e.data); });
+  game.world.drawTile(0, 0);
+  game.getZoomIn().clickEx(function() { game.zoomIn(); });
+  game.getZoomOut().clickEx(function() { game.zoomOut(); });
+  game.getGather().clickEx(function() { game.gather(); });
 });

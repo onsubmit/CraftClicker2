@@ -1,28 +1,43 @@
 Layer = function(oArgs)
 {
   var self = this;
+
+  this._isMined = false;
   this.level = oArgs.level;
-  this.squares = new Array(Layer._rows);
+  this.squares = new Array(Layer.rows);
 
   (function generate()
   {
-    for (var row = 0; row < Layer._rows; row++)
+    for (var row = 0; row < Layer.rows; row++)
     {
-      self.squares[row] = new Array(Layer._cols);
-      for (var col = 0; col < Layer._cols; col++)
+      self.squares[row] = new Array(Layer.cols);
+      for (var col = 0; col < Layer.cols; col++)
       {
-        var objResource = null;
-        for (var i = 0, length = Layer._oreProbabilities.length; i < length; i++)
+        if (self.level === 0)
         {
-          var ore = Layer._oreProbabilities[i];
-          if (self.level >= ore.minLevel && r(ore.probs(self.level)))
-          {
-            objResource = ore.item;
-            break;
-          }
+          // Top layer is Grass
+          self.squares[row][col] = Items.get("Grass");
         }
+        else if (self.level === Layer._maxLayers)
+        {
+          // Bottom layer is Solidite
+          self.squares[row][col] = Items.get("Solidite");
+        }
+        else
+        {
+          var objResource = null;
+          for (var i = 0, length = Layer._oreProbabilities.length; i < length; i++)
+          {
+            var ore = Layer._oreProbabilities[i];
+            if (self.level >= ore.minLevel && r(ore.probs(self.level)))
+            {
+              objResource = ore.item;
+              break;
+            }
+          }
 
-        self.squares[row][col] = objResource || Items.get("Stone");
+          self.squares[row][col] = objResource || Items.get("Stone");
+        }
       }
     }
   })();
@@ -38,8 +53,9 @@ $.extend(Layer.prototype,
 
 $.extend(Layer,
 {
-  _rows: 8,
-  _cols: 8,
+  rows: 8,
+  cols: 8,
+  _maxLayers: 128,
   _oreProbabilities:
   [
     {

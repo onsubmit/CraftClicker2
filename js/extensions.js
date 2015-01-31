@@ -64,3 +64,23 @@ if (!jQuery.fn.dblclickEx)
     return $this;
   }
 }
+
+if (!jQuery.fn.disable)
+{
+  jQuery.fn.disable = function()
+  {
+    var $this = $(this);
+    $this.prop('disabled', true);
+    return $this;
+  }
+}
+
+if (!jQuery.fn.enable)
+{
+  jQuery.fn.enable = function()
+  {
+    var $this = $(this);
+    $this.prop('disabled', false);
+    return $this;
+  }
+}

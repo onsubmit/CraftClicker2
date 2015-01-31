@@ -5,6 +5,7 @@ Player = function(oArgs)
   this.xp   = 0;
   this.xpMax = 20;
   this.vector = { row: 1, col: 1};
+  this.tile = { row: 0, col: 0};
   this.speed = 200; // Number of milliseconds it takes to move one square
   
   this.inventory = new Inventory();
@@ -28,14 +29,9 @@ $.extend(Player.prototype,
     this.xp = this.xp - this.xpMax;
     this.xpMax = this.xpMax + this.level * 2;
   },
-  collect: function(drops) {
-    for (var prop in drops) {
-      var drop = drops[prop];
-      var unmerged = this.inventory.mergeItem(drop.item, drop.amount);
-      if (unmerged > 0) {
-        this.sellItem(drop.item, unmerged);
-      }
-    }
+  gather: function()
+  {
+    this.player.gather();
   },
   toString: function()
   {
