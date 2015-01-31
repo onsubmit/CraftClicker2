@@ -32,3 +32,23 @@ if (!jQuery.fn.fadeOutAndRemove)
     });
   }
 }
+
+if (!jQuery.fn.tap)
+{
+  jQuery.fn.tap = function(eventData, handler)
+  {
+    var $this = $(this);
+    $this.hammer().bind("tap", eventData, handler);
+    return $this;
+  }
+}
+
+if (!jQuery.fn.doubletap)
+{
+  jQuery.fn.doubletap = function(eventData, handler)
+  {
+    var $this = $(this);
+    $this.hammer().bind("doubletap", eventData, handler);
+    return $this;
+  }
+}

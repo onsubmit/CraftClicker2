@@ -25,6 +25,10 @@ $.extend(World.prototype,
     var objTile = this.tiles[row][col];
     this.getCell(row, col).append(objTile.generate());
   },
+  get: function()
+  {
+    return $("#grid");
+  },
   getCell: function(row, col)
   {
     return $("td[data-pos='" + row + "," + col + "']");

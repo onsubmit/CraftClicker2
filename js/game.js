@@ -24,12 +24,28 @@ $.extend(Game.prototype,
         if (row > 0 && col > 0)
         {
           // World cell
-          $td.click({ row: row, col: col }, function(e)
+          /*
+          $td.click(, function(e)
           {
             self.world.unhighlightCell().highlightCell(e.data.row, e.data.col);
             self.player.setDestination(e.data.row, e.data.col);
             self.movePlayer();
+          }).dblclick({ row: row, col: col }, function(e)
+          {
+            self.world.get().fadeOut("fast", function() { $("#tile").fadeIn("fast"); });
           });
+*/
+          var eventData = { row: row, col: col };
+          $td.tap(eventData, function(e)
+          {
+            self.world.unhighlightCell().highlightCell(e.data.row, e.data.col);
+            self.player.setDestination(e.data.row, e.data.col);
+            self.movePlayer();
+          }).doubletap(eventData, function(e)
+          {
+            self.world.get().fadeOut("fast", function() { $("#tile").fadeIn("fast"); });
+          });
+
         }
         else
         {
@@ -131,4 +147,8 @@ $(document).ready(function()
   game.drawWorld(game.world.size.rows, game.world.size.cols).createPlayer(1, 1);
   game.world.highlightCell(1, 1);
   game.drawItems();
+  $("#tile").doubletap(function()
+  {
+    $(this).fadeOut("fast", function() { game.world.get().fadeIn("fast"); });
+  });
 });

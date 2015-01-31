@@ -20,12 +20,13 @@ h1, h2, h3, h4, h5, h6, p {
 
 #inventoryContainer {
   float: left;
-  width: 350px;
+  width: 20%;
+  min-width: 250px;
   height: 100%;
 }
 
 #middle {
-  padding: 0px 150px 0px 150px;
+  padding: 0px 20% 0px 20%;
   margin: 0;
   height: 100%;
 }
@@ -36,14 +37,13 @@ h1, h2, h3, h4, h5, h6, p {
   overflow: auto;
 }
 
-#world table
-{
+#grid {
   empty-cells: show;
   border-spacing: 1px;
   border-collapse: separate;
 }
 
-#world td {
+#grid td {
 	padding: 0px;
   width: 32px;
   height: 32px;
@@ -53,20 +53,38 @@ h1, h2, h3, h4, h5, h6, p {
   background: url('../images/World.png');
 }
 
-#world td.coords {
+#grid td.coords {
   font-size: 0.8em;
   text-align: center;
   vertical-align: middle;
   background: none;
 }
 
-#world td.coords.active {
+#grid td.coords.active {
   font-weight: bold;
   box-shadow: inset 0 0 0 1px #666;
 }
 
-#world td.highlight {
+#grid td.highlight {
   box-shadow: inset 0 0 8px 0px #000;
+}
+
+#tile {
+  display: none;
+  width: 128px;
+  height: 128px;
+  margin: 35px 0 0 35px;
+  background: url('../images/WorldBig.png');
+  border: 1px solid #446826;
+}
+
+#tild td {
+  padding: 0px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  vertical-align: top;
 }
 
 #player {
@@ -86,7 +104,8 @@ h1, h2, h3, h4, h5, h6, p {
 
 #itemsContainer {
   float: right;
-  width: 350px;
+  width: 20%;
+  min-width: 250px;
   height: 100%;
 }
 
