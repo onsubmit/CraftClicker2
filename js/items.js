@@ -124,3 +124,9 @@ Items.add(
     ]
   })
 });
+
+Items.add(
+{
+  name: "Solidite",
+  hardness: -1
+});
