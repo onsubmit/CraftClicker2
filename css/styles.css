@@ -32,13 +32,13 @@ h1, h2, h3, h4, h5, h6, p {
   overflow: auto;
 }
 
-#grid {
+#world {
   empty-cells: show;
   border-spacing: 1px;
   border-collapse: separate;
 }
 
-#grid td {
+#world td {
 	padding: 0px;
   width: 32px;
   height: 32px;
@@ -48,27 +48,32 @@ h1, h2, h3, h4, h5, h6, p {
   background: url('../images/World.png');
 }
 
-#grid td.coords {
+#world td.coords {
   font-size: 0.8em;
   text-align: center;
   vertical-align: middle;
   background: none;
 }
 
-#grid td.coords.active {
+#world td.coords.active {
   font-weight: bold;
   box-shadow: inset 0 0 0 1px #666;
 }
 
-#grid td.highlight {
+#world td.highlight {
   box-shadow: inset 0 0 8px 0px #000;
+}
+
+#buttons {
+  margin-left: 34px;
 }
 
 #tileContainer {
   display: none;
 }
 
-#tile {
+table.tile {
+  display: none;
   width: 128px;
   height: 128px;
   empty-cells: show;
@@ -76,7 +81,7 @@ h1, h2, h3, h4, h5, h6, p {
   border-collapse: separate;
 }
 
-#tile td {
+table.tile td {
   padding: 0px;
   width: 24;
   height: 24;
@@ -85,7 +90,7 @@ h1, h2, h3, h4, h5, h6, p {
   vertical-align: top;
 }
 
-#tile td.active {
+table.tile td.active {
   box-shadow: inset 0 0 8px #000;
 }
 

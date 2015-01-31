@@ -13,31 +13,30 @@ Layer = function(oArgs)
       self.squares[row] = new Array(Layer.cols);
       for (var col = 0; col < Layer.cols; col++)
       {
-        if (self.level === 0)
+        var objResource = null;
+        for (var i = 0, length = Layer._probabilities.length; i < length; i++)
         {
-          // Top layer is Grass
-          self.squares[row][col] = Items.get("Grass");
-        }
-        else if (self.level === Layer._maxLayers)
-        {
-          // Bottom layer is Solidite
-          self.squares[row][col] = Items.get("Solidite");
-        }
-        else
-        {
-          var objResource = null;
-          for (var i = 0, length = Layer._oreProbabilities.length; i < length; i++)
+          var square = Layer._probabilities[i];
+          var minLevel = square.minLevel === 0 ? 0 : square.minLevel || 1;
+          var maxLevel = square.maxLevel === 0 ? 0 : square.maxLevel || Layer._maxLayers;
+          if (self.level < minLevel || self.level > maxLevel)
           {
-            var ore = Layer._oreProbabilities[i];
-            if (self.level >= ore.minLevel && r(ore.probs(self.level)))
-            {
-              objResource = ore.item;
-              break;
-            }
+            continue;
           }
 
-          self.squares[row][col] = objResource || Items.get("Stone");
+          if (r(square.probs(self.level)))
+          {
+            objResource = square.item;
+            break;
+          }
+          else if (square.fallback)
+          {
+            objResource = square.fallback;
+            break;
+          }
         }
+
+        self.squares[row][col] = objResource || Items.get("Stone");
       }
     }
   })();
@@ -56,8 +55,18 @@ $.extend(Layer,
   rows: 8,
   cols: 8,
   _maxLayers: 128,
-  _oreProbabilities:
+  _probabilities:
   [
+    {
+      item: Items.get("Grass"),
+      minLevel: 0,
+      maxLevel: 0,
+      fallback: Items.get("Tree"),
+      probs: function(level)
+      {
+        return level === 0 ? 0.9 : 0;
+      }
+    },
     {
       item: Items.get("Coal Ore"),
       minLevel: 1,
@@ -97,6 +106,15 @@ $.extend(Layer,
           return 0.06 * (1 - Math.pow(level - 64, 1/3) / 4);
         }
       }
-    }
+    },
+    {
+      item: Items.get("Solidite"),
+      minLevel: Layer._maxLayers,
+      maxLevel: Layer._maxLayers,
+      probs: function(level)
+      {
+        return level === Layers._maxLayers ? 1 : 0;
+      }
+    },
   ]
 });

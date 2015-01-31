@@ -31,7 +31,7 @@ $.extend(Player.prototype,
   },
   gather: function()
   {
-    this.player.gather();
+    
   },
   toString: function()
   {

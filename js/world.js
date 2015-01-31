@@ -3,35 +3,54 @@ World = function(oArgs)
   var self = this;
   this.size = { rows: oArgs.rows, cols: oArgs.cols };
   this.tiles = (new Array(oArgs.rows)).assignEach(function() { return new Array(oArgs.cols); });
-
-  (function generateWorld()
-  {
-    for (var row = 0, rows = self.tiles.length; row < rows; row++)
-    {
-      var arrRow = self.tiles[row];
-      for (var col = 0, cols = arrRow.length; col < cols; col++)
-      {
-        arrRow[col] = new Tile();
-        arrRow[col].generate(0);
-      }
-    }
-  })();
 }
 
 $.extend(World.prototype,
 {
-  drawTile: function(row, col)
+  getTile: function(row, col)
   {
     var objTile = this.tiles[row][col];
-    objTile.draw();
+    if (!objTile)
+    {
+      objTile = this.tiles[row][col] = new Tile({ row: row, col: col });
+      objTile.generate(0);
+    }
+
+    return objTile;
+  },
+  getTiles: function()
+  {
+    return $("table.tile");
+  },
+  drawTile: function(row, col)
+  {
+    var isNew = !this.tiles[row][col];
+    var objTile = this.getTile(row, col);
+
+    var $table = null;
+    if (isNew)
+    {
+      $table =  objTile.draw();
+      this.getTileContainer().prepend($table);
+    }
+    else
+    {
+      $table = objTile.getTable();
+    }
+
+    return $table;
   },
   get: function()
   {
-    return $("#grid");
+    return $("#world");
   },
   getContainer: function()
   {
-    return $("#gridContainer");
+    return $("#worldContainer");
+  },
+  getTileContainer: function()
+  {
+    return $("#tileContainer");
   },
   getCell: function(row, col)
   {

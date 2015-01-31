@@ -42,6 +42,8 @@ Items.add(
   hardness: 1
 });
 
+Items.add({ name: "Tree" });
+
 Items.add(
 {
   name: "Stone",

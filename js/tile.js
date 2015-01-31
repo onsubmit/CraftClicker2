@@ -1,17 +1,21 @@
 Tile = function(oArgs)
 {
+  this.row = oArgs.row;
+  this.col = oArgs.col;
   this.layers = [];
   this.digLevel = null;
 }
 
 $.extend(Tile.prototype, 
 {
-  get: function() {
-    return $("#tile");
-  },
-  getSquare: function(row, col)
+  getTable: function()
   {
-    return $("td[data-lpos='" + row + "," + col + "']");
+    return $("table.tile[data-tpos='" + this.row + "," + this.col + "']");
+  },
+  getSquare: function(row, col, $table)
+  {
+    $table = $table || this.get();
+    return $table.children("td[data-spos='" + row + "," + col + "']");
   },
   generate: function(level)
   {
@@ -23,6 +27,11 @@ $.extend(Tile.prototype,
   },
   draw: function()
   {
+    var $table = $("<table/>",
+    {
+      class: "tile"
+    }).attr("data-tpos", this.row + "," + this.col);
+
     var rowsToAdd = [];
     var activeSquare = {row: 0, col: 0};
     for (var row = 0; row < Layer.rows; row++)
@@ -48,17 +57,27 @@ $.extend(Tile.prototype,
           }
         }
 
-        var $td = $("<td/>")
-          .attr("data-lpos", row + "," + col)
-          .css("background", "url('images/" + visibleSquare.name + ".png')");
+        var $td = $("<td/>") .attr("data-spos", row + "," + col);
+        if (level === 0 && visibleSquare == Items.get("Tree"))
+        {
+          $td
+            .css("background", "url('images/Grass.png')")
+            .append($("<img/>", { src: "images/Tree.png"}));
+        }
+        else
+        {
+          $td.css("background", "url('images/" + visibleSquare.name + ".png')");
+        }
+
         $tr.append($td);
       }
 
       rowsToAdd.push($tr);
     }
 
-    this.get().append(rowsToAdd);
-    this.getSquare(activeSquare.row, activeSquare.col).addClass("active");
+    $table.append(rowsToAdd);
+    this.getSquare(activeSquare.row, activeSquare.col, $table).addClass("active");
+    return $table;
   },
   toString: function()
   {

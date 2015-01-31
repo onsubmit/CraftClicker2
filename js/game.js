@@ -2,7 +2,7 @@ function Game(oArgs)
 {
   this._minAnimationDuration = 1;
   this.player = new Player();
-  this.world = new World({ rows: 4, cols: 4});
+  this.world = new World({ rows: 3, cols: 3});
 }
 
 $.extend(Game.prototype,
@@ -10,10 +10,6 @@ $.extend(Game.prototype,
   getPlayer: function()
   {
     return $("#player");
-  },
-  getTile: function()
-  {
-    return $("#tileContainer");
   },
   getZoomIn: function()
   {
@@ -27,17 +23,21 @@ $.extend(Game.prototype,
   {
     return $("#gather");
   },
+  getWorld: function()
+  {
+    return $("#world");
+  },
   drawWorld: function(numRows, numCols)
   {
     var self = this;
-    var $table = $("#grid");
-    for (var row = 0; row <= numRows; row++)
+    var $table = this.getWorld();
+    for (var row = -1; row < numRows; row++)
     {
       var $tr = $("<tr />");       
-      for (var col = 0; col <= numCols; col++)
+      for (var col = -1; col < numCols; col++)
       {
         var $td = $("<td />").attr("data-pos", row + "," + col);
-        if (row > 0 && col > 0)
+        if (row >= 0 && col >= 0)
         {
           var eventData = { row: row, col: col };
           $td.clickEx(eventData, function(e)
@@ -50,12 +50,12 @@ $.extend(Game.prototype,
         else
         {
           $td.addClass("coords");
-          if (row === 0 && col > 0)
+          if (row === -1 && col >= 0)
           {
             // Column header
             $td.text(col);
           }
-          else if (col === 0 && row > 0)
+          else if (col === -1 && row >= 0)
           {
             // Row header
             $td.text(row);
@@ -73,13 +73,22 @@ $.extend(Game.prototype,
   zoomIn: function()
   {
     var self = this;
-    this.world.getContainer().fadeOut("fast", function() { self.getTile().fadeIn("fast"); });
+    var row = this.player.vector.row;
+    var col = this.player.vector.col;
+
+    this.world.getContainer().fadeOut("fast", function()
+    {
+      self.world.getTiles().hide();
+      self.world.drawTile(row, col).show();
+      self.world.getTileContainer().fadeIn("fast");
+    });
+
     return this;
   },
   zoomOut: function()
   {
     var self = this;
-    this.getTile().fadeOut("fast", function() { self.world.getContainer().fadeIn("fast"); });
+    this.world.getTileContainer().fadeOut("fast", function() { self.world.getContainer().fadeIn("fast"); });
     return this;
   },
   createPlayer: function(row, col, complete)
@@ -93,7 +102,7 @@ $.extend(Game.prototype,
     this.player.setPosition(row, col);
     var $worldCell = this.world.getCell(row, col);
     $worldCell.append($player.fadeIn(Math.max(this.player.speed, this._minAnimationDuration), complete));
-    this.world.activateCoord(0, col).activateCoord(row, 0);
+    this.world.activateCoord(-1, col).activateCoord(row, -1);
     return $player;
   },
   movePlayer: function()
@@ -114,13 +123,13 @@ $.extend(Game.prototype,
       if (col !== destCol)
       {
         fMoveRequired = true;
-        self.world.deactivateCoord(0, col);
+        self.world.deactivateCoord(-1, col);
       }
 
       if (row !== destRow)
       {
         fMoveRequired = true;
-        self.world.deactivateCoord(row, 0);
+        self.world.deactivateCoord(row, -1);
       }
 
       if (fMoveRequired)
@@ -165,10 +174,9 @@ var game = new Game();
 
 $(document).ready(function()
 {
-  game.drawWorld(game.world.size.rows, game.world.size.cols).createPlayer(1, 1);
-  game.world.highlightCell(1, 1);
+  game.drawWorld(game.world.size.rows, game.world.size.cols).createPlayer(0, 0);
+  game.world.highlightCell(0, 0);
   game.drawItems();
-  game.world.drawTile(0, 0);
   game.getZoomIn().clickEx(function() { game.zoomIn(); });
   game.getZoomOut().clickEx(function() { game.zoomOut(); });
   game.getGather().clickEx(function() { game.gather(); });
