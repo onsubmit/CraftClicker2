@@ -33,22 +33,34 @@ if (!jQuery.fn.fadeOutAndRemove)
   }
 }
 
-if (!jQuery.fn.tap)
+if (!jQuery.fn.clickEx)
 {
-  jQuery.fn.tap = function(eventData, handler)
+  jQuery.fn.clickEx = function(data, handler)
   {
+    if (!handler)
+    {
+      handler = data;
+      data = undefined;
+    }
+
     var $this = $(this);
-    $this.hammer().bind("tap", eventData, handler);
+    $this.on("click tap", data, handler);
     return $this;
   }
 }
 
-if (!jQuery.fn.doubletap)
+if (!jQuery.fn.dblclickEx)
 {
-  jQuery.fn.doubletap = function(eventData, handler)
+  jQuery.fn.dblclickEx = function(data, handler)
   {
+    if (!handler)
+    {
+      handler = data;
+      data = undefined;
+    }
+
     var $this = $(this);
-    $this.hammer().bind("doubletap", eventData, handler);
+    $this.on("dblclick doubletap", data, handler);
     return $this;
   }
 }

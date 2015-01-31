@@ -11,6 +11,9 @@ $.extend(Game.prototype,
   {
     return $("#player");
   },
+  getTile: function() {
+    return $("#tile");
+  },
   drawWorld: function(numRows, numCols)
   {
     var self = this;
@@ -23,29 +26,23 @@ $.extend(Game.prototype,
         var $td = $("<td />").attr("data-pos", row + "," + col);
         if (row > 0 && col > 0)
         {
-          // World cell
-          /*
-          $td.click(, function(e)
-          {
-            self.world.unhighlightCell().highlightCell(e.data.row, e.data.col);
-            self.player.setDestination(e.data.row, e.data.col);
-            self.movePlayer();
-          }).dblclick({ row: row, col: col }, function(e)
-          {
-            self.world.get().fadeOut("fast", function() { $("#tile").fadeIn("fast"); });
-          });
-*/
           var eventData = { row: row, col: col };
-          $td.tap(eventData, function(e)
+          $td.clickEx(eventData, function(e)
           {
             self.world.unhighlightCell().highlightCell(e.data.row, e.data.col);
             self.player.setDestination(e.data.row, e.data.col);
             self.movePlayer();
-          }).doubletap(eventData, function(e)
+          }).dblclickEx(eventData, function(e)
           {
-            self.world.get().fadeOut("fast", function() { $("#tile").fadeIn("fast"); });
+            if (self.player.vector.row === e.data.row && self.player.vector.col == e.data.col)
+            {
+              self.zoomIn(e.data.row, e.data.col);
+            }
+            else
+            {
+              self._fPendingZoom = true;
+            }
           });
-
         }
         else
         {
@@ -69,6 +66,18 @@ $.extend(Game.prototype,
     }
     
     return this;
+  },
+  zoomIn: function(row, col, self)
+  {
+    self = self || this;
+    var $tile = self.getTile();
+    $tile.text(row + ", " + col);
+    self.world.get().fadeOut("fast", function() { self.getTile().fadeIn("fast"); });
+  },
+  zoomOut: function(self)
+  {
+    self = self || this;
+    self.getTile().fadeOut("fast", function() { self.world.get().fadeIn("fast"); });
   },
   createPlayer: function(row, col, complete)
   {
@@ -123,6 +132,11 @@ $.extend(Game.prototype,
           $player = self.createPlayer(row, col, function() { step(); });
         });
       }
+      else if (self._fPendingZoom)
+      {
+        self.zoomIn(row, col);
+        self._fPendingZoom = false;
+      }
     })();
   },
   drawItems: function()
@@ -147,8 +161,5 @@ $(document).ready(function()
   game.drawWorld(game.world.size.rows, game.world.size.cols).createPlayer(1, 1);
   game.world.highlightCell(1, 1);
   game.drawItems();
-  $("#tile").doubletap(function()
-  {
-    $(this).fadeOut("fast", function() { game.world.get().fadeIn("fast"); });
-  });
+  game.getTile().dblclickEx(game, function(e) { game.zoomOut(e.data); });
 });
