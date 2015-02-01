@@ -27,6 +27,40 @@ $.extend(Game.prototype,
   {
     return $("#world");
   },
+  getSaveData: function()
+  {
+    var objGame = btoa(JSON.stringify(game));
+    return objGame;
+  },
+  save: function()
+  {
+    localStorage['CraftClicker2'] = game.getSaveData();
+  },
+  load: function()
+  {
+    var objGame = JSON.parse(atob(localStorage['CraftClicker2']));
+    this.recursiveLoad(game, objGame);
+  },
+  recursiveLoad: function(current, saved)
+  {
+    for (var prop in saved)
+    {
+      // Iterate through each object property
+      if (current.hasOwnProperty(prop))
+      {
+        // Current object has the same property as the saved object
+        if (current[prop] != null && Object.keys(current[prop]).length === 0)
+        {
+          // Don't overwrite objects, only properties.
+          // We don't want to kill any methods.
+          current[prop] = saved[prop];
+        }
+
+        // We must go deeper
+        this.recursiveLoad(current[prop], saved[prop]);
+      }
+    }
+  },
   drawWorld: function(numRows, numCols)
   {
     var self = this;
@@ -184,4 +218,11 @@ $(document).ready(function()
   game.getZoomIn().click(function() { game.zoomIn(); });
   game.getZoomOut().click(function() { game.zoomOut(); });
   game.getGather().click(function() { game.gather(); });
+});
+
+$(document).keypress(function(e) {
+  e.preventDefault(); // Prevent page down on hitting space bar
+  if (e.which == 71 || e.which == 103 && game.getGather().isVisible()) { // '[Gg]'
+    game.gather();
+  }
 });

@@ -52,3 +52,11 @@ if (!jQuery.fn.enable)
     return $this;
   }
 }
+
+if (!jQuery.fn.isVisible)
+{
+  jQuery.fn.isVisible = function()
+  {
+    return $(this).is(':visible');
+  }
+}

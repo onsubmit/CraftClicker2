@@ -63,7 +63,7 @@ $.extend(Tile.prototype,
       if (wasReversed)
       {
         this.getAllSquares().removeClass();
-        this.getAllDeepLayers().remove();
+        this.getAllDeepLayers().removeClass("deep");
         this.digLevel++;
       }
       else
@@ -132,50 +132,27 @@ $.extend(Tile.prototype,
         .css("background", "url('images/" + square.name + ".png')");
       if (isDeep)
       {
-        var strDeepClass = null;
-        if (row === 0)
+        var strShadowClass = null;
+        if (this._reverse)
         {
-          if (col === 0)
+          $(".shadowTopLeft").toggleClass("shadowTopLeft shadowTop");
+          strShadowClass = col === 0 ? "shadowTop" : "shadowTopLeft";
+          if (row < Layer.rows - 1)
           {
-            strDeepClass = "shadowTopLeft";
-          }
-          else if (col === Layer.cols - 1)
-          {
-            strDeepClass = "shadowTopRight";
-          }
-          else
-          {
-            strDeepClass = "shadowTop";
+            this.getSquare(row + 1, col).removeClass("shadowTop");
           }
         }
-        else if (col === 0)
+        else
         {
-          if (row === Layer.rows - 1)
+          $(".shadowBottomRight").toggleClass("shadowBottomRight shadowBottom");
+          strShadowClass = col === Layer.cols - 1 ? "shadowBottom" : "shadowBottomRight";
+          if (row > 0)
           {
-            strDeepClass = "shadowBottomLeft";
+            this.getSquare(row - 1, col).removeClass("shadowBottom");
           }
-          else
-          {
-            strDeepClass = "shadowLeft";
-          }
-        }
-        else if (row === Layer.rows - 1)
-        {
-          if (col === Layer.cols - 1)
-          {
-            strDeepClass = "shadowBottomRight";
-          }
-          else
-          {
-            strDeepClass = "shadowBottom";
-          }
-        }
-        else if (col === Layer.cols - 1)
-        {
-          strDeepClass = "shadowRight";
         }
 
-        $td.addClass(strDeepClass).append($("<div/>", { class: "deep" }));
+        $td.addClass(strShadowClass + " deep");
       }
     }
 

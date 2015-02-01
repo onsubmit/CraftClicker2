@@ -79,6 +79,7 @@ table.tile {
   empty-cells: show;
   border-spacing: 1px;
   border-collapse: separate;
+  table-layout: fixed;
 }
 
 table.tile td {
@@ -96,48 +97,55 @@ table.tile td.active {
 
 table.tile td.shadowTopLeft
 {
-  box-shadow: inset 4px 4px 8px 0px #000;
+  box-shadow: inset 4px 4px 2px 0px #000;
 }
 
 table.tile td.shadowTop
 {
-  box-shadow: inset 0px 4px 8px 0px #000;
+  box-shadow: inset 0px 4px 2px 0px #000;
 }
 
 table.tile td.shadowTopRight
 {
-  box-shadow: inset -4px 4px 8px 0px #000;
+  box-shadow: inset -4px 4px 2px 0px #000;
 }
 
 table.tile td.shadowLeft
 {
-  box-shadow: inset 4px 0px 8px 0px #000;
+  box-shadow: inset 4px 0px 2px 0px #000;
 }
 
 table.tile td.shadowRight
 {
-  box-shadow: inset -4px 0px 8px 0px #000;
+  box-shadow: inset -4px 0px 2px 0px #000;
 }
 
 table.tile td.shadowBottomLeft
 {
-  box-shadow: inset 4px -4px 8px 0px #000;
+  box-shadow: inset 4px -4px 2px 0px #000;
 }
 
 table.tile td.shadowBottom
 {
-  box-shadow: inset 0px -4px 8px 0px #000;
+  box-shadow: inset 0px -4px 2px 0px #000;
 }
 
 table.tile td.shadowBottomRight
 {
-  box-shadow: inset -4px -4px 8px 0px #000;
+  box-shadow: inset -4px -4px 2px 0px #000;
 }
 
-table.tile td div.deep {
+table.tile td.deep div {
   background-color: #000;
   height: 100%;
   opacity: 0.2;
+}
+
+table.tile td.deep {
+  filter: blur(1px) brightness(0.75);
+  -webkit-filter: blur(1px) brightness(0.75);
+  -o-filter: blur(1px) brightness(0.75);
+  -ms-filter: blur(1px) brightness(0.75);
 }
 
 #player {
