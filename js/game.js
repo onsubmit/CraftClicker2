@@ -40,7 +40,7 @@ $.extend(Game.prototype,
         if (row >= 0 && col >= 0)
         {
           var eventData = { row: row, col: col };
-          $td.clickEx(eventData, function(e)
+          $td.click(eventData, function(e)
           {
             self.world.unhighlightCell().highlightCell(e.data.row, e.data.col);
             self.player.setDestination(e.data.row, e.data.col);
@@ -181,7 +181,7 @@ $(document).ready(function()
   game.drawWorld(game.world.size.rows, game.world.size.cols).createPlayer(0, 0);
   game.world.highlightCell(0, 0);
   game.drawItems();
-  game.getZoomIn().clickEx(function() { game.zoomIn(); });
-  game.getZoomOut().clickEx(function() { game.zoomOut(); });
-  game.getGather().clickEx(function() { game.gather(); });
+  game.getZoomIn().click(function() { game.zoomIn(); });
+  game.getZoomOut().click(function() { game.zoomOut(); });
+  game.getGather().click(function() { game.gather(); });
 });

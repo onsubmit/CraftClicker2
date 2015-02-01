@@ -33,38 +33,6 @@ if (!jQuery.fn.fadeOutAndRemove)
   }
 }
 
-if (!jQuery.fn.clickEx)
-{
-  jQuery.fn.clickEx = function(data, handler)
-  {
-    if (!handler)
-    {
-      handler = data;
-      data = undefined;
-    }
-
-    var $this = $(this);
-    $this.on("click tap", data, handler);
-    return $this;
-  }
-}
-
-if (!jQuery.fn.dblclickEx)
-{
-  jQuery.fn.dblclickEx = function(data, handler)
-  {
-    if (!handler)
-    {
-      handler = data;
-      data = undefined;
-    }
-
-    var $this = $(this);
-    $this.on("dblclick doubletap", data, handler);
-    return $this;
-  }
-}
-
 if (!jQuery.fn.disable)
 {
   jQuery.fn.disable = function()
