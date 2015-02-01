@@ -2,7 +2,6 @@ Layer = function(oArgs)
 {
   var self = this;
 
-  this._isMined = false;
   this.level = oArgs.level;
   this.squares = new Array(Layer.rows);
 
@@ -24,7 +23,7 @@ Layer = function(oArgs)
             continue;
           }
 
-          if (r(square.probs(self.level)))
+          if (r(square.probs(self.level, row, col)))
           {
             objResource = square.item;
             break;
@@ -36,7 +35,12 @@ Layer = function(oArgs)
           }
         }
 
-        self.squares[row][col] = objResource || Items.get("Stone");
+        var item = objResource || Items.get("Stone");
+        self.squares[row][col] = 
+        {
+          item: item,
+          durability: item.hardness
+        };
       }
     }
   })();
@@ -44,6 +48,13 @@ Layer = function(oArgs)
 
 $.extend(Layer.prototype,
 {
+  gather: function(row, col)
+  {
+    var objSquare = this.squares[row][col];
+    var arrDrops = objSquare.item.gather ? objSquare.item.gather() : [{ item: objSquare.item }];
+    objSquare.durability -= 1;
+    return arrDrops;
+  },
   toString: function()
   {
     return "";
@@ -62,9 +73,17 @@ $.extend(Layer,
       minLevel: 0,
       maxLevel: 0,
       fallback: Items.get("Tree"),
-      probs: function(level)
+      probs: function(level, row, col)
       {
-        return level === 0 ? 0.9 : 0;
+        if (level === 0 && row === 0 && col === 0)
+        {
+          // Top-left corner will always be a tree
+          return 0;
+        }
+        else
+        {
+          return level === 0 ? 0.9 : 0;
+        }
       }
     },
     {
@@ -113,7 +132,7 @@ $.extend(Layer,
       maxLevel: Layer._maxLayers,
       probs: function(level)
       {
-        return level === Layers._maxLayers ? 1 : 0;
+        return level === Layer._maxLayers ? 1 : 0;
       }
     },
   ]

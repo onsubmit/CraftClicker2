@@ -42,7 +42,36 @@ Items.add(
   hardness: 1
 });
 
-Items.add({ name: "Tree" });
+Items.add(
+{
+  name: "Tree",
+  hardness: 4,
+  gather: function()
+  {
+    var numWoodToDrop = 1 + Math.round(3 * Math.random());
+    var arrDrops = 
+    [
+      {
+        item: Items.get("Wood"),
+        amount: numWoodToDrop
+      }
+    ];
+
+    var fDropSapling = r(0.25);
+    if (fDropSapling)
+    {
+      arrDrops.push({ item: Items.get("Sapling") });
+    }
+
+    return arrDrops;
+  }
+});
+
+Items.add(
+{
+  name: "Sapling",
+  hidden: true
+});
 
 Items.add(
 {

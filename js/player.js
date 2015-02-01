@@ -29,10 +29,6 @@ $.extend(Player.prototype,
     this.xp = this.xp - this.xpMax;
     this.xpMax = this.xpMax + this.level * 2;
   },
-  gather: function()
-  {
-    
-  },
   toString: function()
   {
     return "";

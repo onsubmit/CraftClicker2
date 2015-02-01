@@ -153,19 +153,23 @@ $.extend(Game.prototype,
   },
   gather: function()
   {
-    this.player.gather();
+    var arrDrops = this.world.getTile(this.player.vector.row, this.player.vector.col).gather();
+    this.player.inventory.merge(arrDrops);
   },
   drawItems: function()
   {
     var $itemList = $("#itemList");
     Items.forEach(function(item)
     {
-      var $img = $("<img/>",
+      if (!item.hidden)
       {
-        src: "images/" + item.name + ".png",
-        class: "item",
-        title: item.name
-      }).appendTo($itemList);
+        var $img = $("<img/>",
+        {
+          src: "images/" + item.name + ".png",
+          class: "item",
+          title: item.name
+        }).appendTo($itemList);
+      }
     });
   }
 });
