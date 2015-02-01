@@ -121,12 +121,15 @@ $.extend(Tile.prototype,
     if (level === 0 && square == Items.get("Tree"))
     {
       $td
+        .attr("title", "Tree")
         .css("background", "url('images/Grass.png')")
         .append($("<img/>", { src: "images/Tree.png"}));
     }
     else
     {
-      $td.css("background", "url('images/" + square.name + ".png')");
+      $td
+        .attr("title", square.name)
+        .css("background", "url('images/" + square.name + ".png')");
       if (isDeep)
       {
         var strDeepClass = null;
