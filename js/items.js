@@ -45,8 +45,8 @@ Items.add(
 Items.add(
 {
   name: "Tree",
+  hidden: true,
   hardness: 4,
-  image: "images/TreeTile.png",
   gather: function()
   {
     return [{ item: Items.get("Wood") }].pushIf(r(0.25), { item: Items.get("Sapling") });
@@ -56,7 +56,6 @@ Items.add(
 Items.add(
 {
   name: "Sapling",
-  hidden: true
 });
 
 Items.add(
