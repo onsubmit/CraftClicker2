@@ -188,7 +188,10 @@ $.extend(Game.prototype,
   gather: function()
   {
     var arrDrops = this.world.getTile(this.player.vector.row, this.player.vector.col).gather();
-    this.player.inventory.merge(arrDrops);
+    if (arrDrops)
+    {
+      this.player.inventory.merge(arrDrops);
+    }
   },
   drawItems: function()
   {

@@ -3,6 +3,16 @@ var r = function(threshold)
   return Math.random() < threshold;
 }
 
+if (!Math.randomInt)
+{
+  Math.randomInt = function(min, max, bIsUpperBoundExclusive)
+  {
+    var multiplier = max - min + 1;
+    if (bIsUpperBoundExclusive) multiplier--;
+    return Math.floor(min + multiplier * Math.random());
+  }
+}
+
 if (!Array.prototype.assignEach)
 {
   Array.prototype.assignEach = function(f)
@@ -11,6 +21,19 @@ if (!Array.prototype.assignEach)
     for(var i = 0; i < length; i++)
     {
       this[i] = f();
+    }
+
+    return this;
+  }
+}
+
+if (!Array.prototype.pushIf)
+{
+  Array.prototype.pushIf = function(fCondition, item)
+  {
+    if (fCondition)
+    {
+      this.push(item);
     }
 
     return this;

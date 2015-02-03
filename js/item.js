@@ -6,6 +6,7 @@ Item = function(oArgs)
   this.hidden = !!oArgs.hidden;
   this.recipe = oArgs.recipe;
   this.gather = oArgs.gather;
+  this.image = oArgs.image;
 };
 
 $.extend(Item.prototype,

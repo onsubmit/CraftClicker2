@@ -5,45 +5,49 @@ Layer = function(oArgs)
   this.level = oArgs.level;
   this.squares = new Array(Layer.rows);
 
-  (function generate()
+  for (var row = 0; row < Layer.rows; row++)
   {
-    for (var row = 0; row < Layer.rows; row++)
+    self.squares[row] = new Array(Layer.cols);
+    for (var col = 0; col < Layer.cols; col++)
     {
-      self.squares[row] = new Array(Layer.cols);
-      for (var col = 0; col < Layer.cols; col++)
+      var clusterSize = 1;
+      var objResource = null;
+      for (var i = 0, length = Layer._probabilities.length; i < length; i++)
       {
-        var objResource = null;
-        for (var i = 0, length = Layer._probabilities.length; i < length; i++)
+        var square = Layer._probabilities[i];
+        var minLevel = square.minLevel === 0 ? 0 : square.minLevel || 1;
+        var maxLevel = square.maxLevel === 0 ? 0 : square.maxLevel || Layer._maxLayers;
+        if (self.level < minLevel || self.level > maxLevel)
         {
-          var square = Layer._probabilities[i];
-          var minLevel = square.minLevel === 0 ? 0 : square.minLevel || 1;
-          var maxLevel = square.maxLevel === 0 ? 0 : square.maxLevel || Layer._maxLayers;
-          if (self.level < minLevel || self.level > maxLevel)
-          {
-            continue;
-          }
-
-          if (r(square.probs(self.level, row, col)))
-          {
-            objResource = square.item;
-            break;
-          }
-          else if (square.fallback)
-          {
-            objResource = square.fallback;
-            break;
-          }
+          continue;
         }
 
-        var item = objResource || Items.get("Stone");
-        self.squares[row][col] = 
+        // Choose the current item if its generation function returns true.
+        // Otherwise choose the fallback item if it exists.
+        var fSquareChosen = square.probs && r(square.probs(self.level, row, col));
+        if (!fSquareChosen && square.fallback)
         {
-          item: item,
-          durability: item.hardness
-        };
+          square = square.fallback;
+          fSquareChosen = true;
+        }
+
+        if (fSquareChosen)
+        {
+          objResource = square.item;
+          clusterSize = square.getClusterSize ? square.getClusterSize(self.level) : 1
+          break;
+        }
       }
+
+      var item = objResource || Items.get("Stone");
+      self.squares[row][col] = 
+      {
+        item: item,
+        hardness: item.hardness,
+        clusterSize: clusterSize
+      };
     }
-  })();
+  }
 };
 
 $.extend(Layer.prototype,
@@ -51,9 +55,15 @@ $.extend(Layer.prototype,
   gather: function(row, col)
   {
     var objSquare = this.squares[row][col];
-    var arrDrops = objSquare.item.gather ? objSquare.item.gather() : [{ item: objSquare.item }];
-    objSquare.durability -= 1;
-    return arrDrops;
+    if (--objSquare.hardness === 0)
+    {
+      // The square has been fully broken.
+      objSquare.clusterSize -= 1;
+      var arrDrops = objSquare.item.gather ? objSquare.item.gather() : [{ item: objSquare.item }];
+      return arrDrops;
+    }
+
+    return null;
   },
   toString: function()
   {
@@ -72,7 +82,6 @@ $.extend(Layer,
       item: Items.get("Grass"),
       minLevel: 0,
       maxLevel: 0,
-      fallback: Items.get("Tree"),
       probs: function(level, row, col)
       {
         if (level === 0 && row === 0 && col === 0)
@@ -83,6 +92,14 @@ $.extend(Layer,
         else
         {
           return level === 0 ? 0.9 : 0;
+        }
+      },
+      fallback: 
+      {
+        item: Items.get("Tree"),
+        getClusterSize: function(level)
+        {
+          return Math.randomInt(2, 6);
         }
       }
     },
@@ -105,6 +122,24 @@ $.extend(Layer,
           // https://www.wolframalpha.com/share/clip?f=d41d8cd98f00b204e9800998ecf8427ehrb1vq9f0j
           return 0.08 * (1 - Math.pow(level - 64, 1/3) / 4);
         }
+      },
+      getClusterSize: function(level)
+      {
+        if (level <= 10)
+        {
+          // 1-5
+          return 1 + Math.round(level * Math.random() / 2.5);
+        }
+        else if (level <= 64)
+        {
+          // 3-10
+          return 2 + Math.round(level * Math.random() / 8);
+        }
+        else
+        {
+          // 8-16
+          return Math.round(level * Math.random() / 8);
+        }
       }
     },
     {
@@ -123,6 +158,24 @@ $.extend(Layer,
         else
         {
           return 0.06 * (1 - Math.pow(level - 64, 1/3) / 4);
+        }
+      },
+      getClusterSize: function(level)
+      {
+        if (level <= 10)
+        {
+          // 1-3
+          return 1 + Math.round(level * Math.random() / 5);
+        }
+        else if (level <= 64)
+        {
+          // 3-7
+          return 3 + Math.round(level * Math.random() / 16);
+        }
+        else
+        {
+          // 2-4
+          return Math.round(level * Math.random() / 32);
         }
       }
     },

@@ -46,24 +46,10 @@ Items.add(
 {
   name: "Tree",
   hardness: 4,
+  image: "images/TreeTile.png",
   gather: function()
   {
-    var numWoodToDrop = 1 + Math.round(3 * Math.random());
-    var arrDrops = 
-    [
-      {
-        item: Items.get("Wood"),
-        amount: numWoodToDrop
-      }
-    ];
-
-    var fDropSapling = r(0.25);
-    if (fDropSapling)
-    {
-      arrDrops.push({ item: Items.get("Sapling") });
-    }
-
-    return arrDrops;
+    return [{ item: Items.get("Wood") }].pushIf(r(0.25), { item: Items.get("Sapling") });
   }
 });
 

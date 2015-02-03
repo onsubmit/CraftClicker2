@@ -53,25 +53,34 @@ $.extend(Tile.prototype,
   {
     var objLayer = this.layers[this.digLevel];
     var arrDrops = objLayer.gather(this.activeSquare.row, this.activeSquare.col);
-    var objSquare = objLayer.squares[this.activeSquare.row][this.activeSquare.col];
-    if (objSquare.durability === 0)
+    if (arrDrops) // Null if square is still in the process of breaking
     {
-      // The square has been fully looted
-      objLayer.squares[this.activeSquare.row][this.activeSquare.col] = undefined;
-      this.redrawSquare(this.activeSquare.row, this.activeSquare.col);
-      var wasReversed = this.advanceActiveRow();
-      if (wasReversed)
+      var objSquare = objLayer.squares[this.activeSquare.row][this.activeSquare.col];
+      if (objSquare.clusterSize === 0)
       {
-        this.getAllSquares().removeClass();
-        this.getAllDeepLayers().removeClass("deep");
-        this.digLevel++;
+        // The cluster has been fully mined.
+        // Advance the active square.
+        objLayer.squares[this.activeSquare.row][this.activeSquare.col] = undefined;
+        this.redrawSquare(this.activeSquare.row, this.activeSquare.col);
+        var wasReversed = this.advanceActiveRow();
+        if (wasReversed)
+        {
+          this.getAllSquares().removeClass();
+          this.getAllDeepLayers().removeClass("deep");
+          this.digLevel++;
+        }
+        else
+        {
+          this.deactivateSquare();
+        }
+        
+        this.activateSquare(this.activeSquare.row, this.activeSquare.col);
       }
       else
       {
-        this.deactivateSquare();
+        objSquare.hardness = Items.get(objSquare.item.name).hardness;
+        this.getSquare(this.activeSquare.row, this.activeSquare.col).text(objSquare.clusterSize);
       }
-      
-      this.activateSquare(this.activeSquare.row, this.activeSquare.col);
     }
 
     return arrDrops;
@@ -117,43 +126,39 @@ $.extend(Tile.prototype,
   },
   drawSquare: function(row, col, level, square, isDeep)
   {
-    var $td = $("<td/>") .attr("data-spos", row + "," + col);
-    if (level === 0 && square == Items.get("Tree"))
-    {
-      $td
-        .attr("title", "Tree")
-        .css("background", "url('images/Grass.png')")
-        .append($("<img/>", { src: "images/Tree.png"}));
-    }
-    else
-    {
-      $td
-        .attr("title", square.name)
-        .css("background", "url('images/" + square.name + ".png')");
-      if (isDeep)
-      {
-        var strShadowClass = null;
-        if (this._reverse)
-        {
-          $(".shadowTopLeft").toggleClass("shadowTopLeft shadowTop");
-          strShadowClass = col === 0 ? "shadowTop" : "shadowTopLeft";
-          if (row < Layer.rows - 1)
-          {
-            this.getSquare(row + 1, col).removeClass("shadowTop");
-          }
-        }
-        else
-        {
-          $(".shadowBottomRight").toggleClass("shadowBottomRight shadowBottom");
-          strShadowClass = col === Layer.cols - 1 ? "shadowBottom" : "shadowBottomRight";
-          if (row > 0)
-          {
-            this.getSquare(row - 1, col).removeClass("shadowBottom");
-          }
-        }
+    var strImagePath = square.item.image || "images/" + square.item.name + ".png";
+    var $td = $("<td/>") .attr("data-spos", row + "," + col)
+      .attr("title", square.item.name)
+      .css("background", "url('" + strImagePath + "')");
 
-        $td.addClass(strShadowClass + " deep");
+    if (square.clusterSize > 1)
+    {
+      $td.text(square.clusterSize);
+    }
+
+    if (isDeep)
+    {
+      var strShadowClass = null;
+      if (this._reverse)
+      {
+        $(".shadowTopLeft").toggleClass("shadowTopLeft shadowTop");
+        strShadowClass = col === 0 ? "shadowTop" : "shadowTopLeft";
+        if (row < Layer.rows - 1)
+        {
+          this.getSquare(row + 1, col).removeClass("shadowTop");
+        }
       }
+      else
+      {
+        $(".shadowBottomRight").toggleClass("shadowBottomRight shadowBottom");
+        strShadowClass = col === Layer.cols - 1 ? "shadowBottom" : "shadowBottomRight";
+        if (row > 0)
+        {
+          this.getSquare(row - 1, col).removeClass("shadowBottom");
+        }
+      }
+
+      $td.addClass(strShadowClass + " deep");
     }
 
     return $td;
@@ -177,7 +182,11 @@ $.extend(Tile.prototype,
       if (++level < Layer._maxLayers)
       {
         isDeep = true;
-        this.layers[level] = new Layer({ level: level });
+        if (!this.layers[level])
+        {
+          this.layers[level] = new Layer({ level: level });
+        }
+        
         square = this.layers[level].squares[row][col];
       }
       else
@@ -186,7 +195,7 @@ $.extend(Tile.prototype,
       }
     }
 
-    return this.drawSquare(row, col, level, square.item, isDeep);
+    return this.drawSquare(row, col, level, square, isDeep);
   },
   draw: function()
   {
