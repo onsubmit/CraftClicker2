@@ -91,7 +91,7 @@ table.tile td {
   padding: 0 1px 0 0;
 
   color: #fff;
-  font-family: consonlas, monospace;
+  font-family: consolas, monospace;
   text-align: center;
   text-shadow: 1px 1px #000;
 }
@@ -100,57 +100,58 @@ table.tile td.active {
   box-shadow: inset 0 0 0px 1px #fff;
 }
 
-table.tile td.shadowTopLeft
-{
-  box-shadow: inset 4px 4px 2px 0px #000;
+table.tile td div.layer {
+  width: 23px;
+  height: 18px;
+  min-width: 23px;
+  min-height: 18px;
+  padding-top: 6px;
+  padding-right: 1px;
 }
 
-table.tile td.shadowTop
-{
-  box-shadow: inset 0px 4px 2px 0px #000;
+table.tile td div.shadowTop {
+  color: #333;
+  background: url('../images/shadows/Top.png');
 }
 
-table.tile td.shadowTopRight
-{
-  box-shadow: inset -4px 4px 2px 0px #000;
+table.tile td div.shadowTopLeft {
+  color: #333;
+  background: url('../images/shadows/TopLeft.png');
 }
 
-table.tile td.shadowLeft
-{
-  box-shadow: inset 4px 0px 2px 0px #000;
+table.tile td div.shadowTopLeftCorner {
+  color: #333;
+  background: url('../images/shadows/TopLeftCorner.png');
 }
 
-table.tile td.shadowRight
-{
-  box-shadow: inset -4px 0px 2px 0px #000;
+table.tile td div.shadowBottom {
+  color: #333;
+  background: url('../images/shadows/Bottom.png');
 }
 
-table.tile td.shadowBottomLeft
-{
-  box-shadow: inset 4px -4px 2px 0px #000;
+table.tile td div.shadowBottomRight {
+  color: #333;
+  background: url('../images/shadows/BottomRight.png');
 }
 
-table.tile td.shadowBottom
-{
-  box-shadow: inset 0px -4px 2px 0px #000;
+table.tile td div.shadowBottomRightCorner {
+  color: #333;
+  background: url('../images/shadows/BottomRightCorner.png');
 }
 
-table.tile td.shadowBottomRight
-{
-  box-shadow: inset -4px -4px 2px 0px #000;
+table.tile td div.shadowRight {
+  color: #333;
+  background: url('../images/shadows/Right.png');
 }
 
-table.tile td.deep div {
-  background-color: #000;
-  height: 100%;
-  opacity: 0.2;
+table.tile td div.shadowLeft {
+  color: #333;
+  background: url('../images/shadows/Left.png');
 }
 
-table.tile td.deep {
-  filter: blur(1px) brightness(0.75);
-  -webkit-filter: blur(1px) brightness(0.75);
-  -o-filter: blur(1px) brightness(0.75);
-  -ms-filter: blur(1px) brightness(0.75);
+table.tile td div.shadowAll {
+  color: #333;
+  background: url('../images/shadows/DepthShade.png');
 }
 
 #player {

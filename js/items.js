@@ -58,25 +58,7 @@ Items.add(
   name: "Sapling",
 });
 
-Items.add(
-{
-  name: "Stone",
-  hardness: 4
-});
-
 Items.add({ name: "Wood" });
-
-Items.add(
-{
-  name: "Coal Ore",
-  hardness: 6
-});
-
-Items.add(
-{
-  name: "Iron Ore",
-  hardness: 8
-});
 
 Items.add(
 {
@@ -139,6 +121,24 @@ Items.add(
       ]
     ]
   })
+});
+
+Items.add(
+{
+  name: "Stone",
+  hardness: 4
+});
+
+Items.add(
+{
+  name: "Coal Ore",
+  hardness: 6
+});
+
+Items.add(
+{
+  name: "Iron Ore",
+  hardness: 8
 });
 
 Items.add(

@@ -23,9 +23,9 @@ $.extend(Tile.prototype,
   {
     return this.getTable().find("td");
   },
-  getAllDeepLayers: function()
+  getAllShadowedSquares: function()
   {
-    return this.getTable().find(".deep");
+    return this.getTable().find(".shadowAll");
   },
   getActiveSquare: function(row, col)
   {
@@ -65,8 +65,7 @@ $.extend(Tile.prototype,
         var wasReversed = this.advanceActiveRow();
         if (wasReversed)
         {
-          this.getAllSquares().removeClass();
-          this.getAllDeepLayers().removeClass("deep");
+          this.getAllShadowedSquares().removeClass("shadowAll");
           this.digLevel++;
         }
         else
@@ -79,7 +78,7 @@ $.extend(Tile.prototype,
       else
       {
         objSquare.hardness = Items.get(objSquare.item.name).hardness;
-        this.getSquare(this.activeSquare.row, this.activeSquare.col).text(objSquare.clusterSize);
+        this.getSquare(this.activeSquare.row, this.activeSquare.col).find(".layer").text(objSquare.clusterSize);
       }
     }
 
@@ -126,6 +125,7 @@ $.extend(Tile.prototype,
   },
   drawSquare: function(row, col, level, square, isDeep)
   {
+    var $table = this.getTable();
     var strImagePath = square.item.image || "images/" + square.item.name + ".png";
     var $td = $("<td/>") .attr("data-spos", row + "," + col)
       .attr("title", square.item.name)
@@ -133,32 +133,88 @@ $.extend(Tile.prototype,
 
     if (square.clusterSize > 1)
     {
-      $td.text(square.clusterSize);
+      $td.append($("<div/>",
+      {
+        text: square.clusterSize,
+        class: "layer"
+      }));
     }
 
     if (isDeep)
     {
       var strShadowClass = null;
+      var fIsFirstRow = row === 0;
+      var fIsFirstCol = col === 0;
+      var fIsLastRow  = row === Layer.rows - 1;
+      var fIsLastCol  = col === Layer.cols - 1;
       if (this._reverse)
       {
-        $(".shadowTopLeft").toggleClass("shadowTopLeft shadowTop");
-        strShadowClass = col === 0 ? "shadowTop" : "shadowTopLeft";
-        if (row < Layer.rows - 1)
+        if (fIsFirstCol && !fIsFirstRow)
         {
-          this.getSquare(row + 1, col).removeClass("shadowTop");
+          strShadowClass = "shadowTop";
+        }
+        else if (!fIsFirstRow)
+        {
+          strShadowClass = "shadowTopLeft";
+        }
+        else
+        {
+          $table.find(".shadowLeft").toggleClass("shadowLeft shadowAll");
+          if (!fIsFirstCol)
+          {
+            strShadowClass = "shadowLeft";
+          }
+        }            
+
+        $table.find(".shadowTopLeft").toggleClass("shadowTopLeft shadowTop");
+        if (!fIsLastRow)
+        {
+          $table.find(".shadowTopLeftCorner").toggleClass("shadowTopLeftCorner shadowAll");
+          var $shadowTop = this.getSquare(row + 1, col, $table).find(".shadowTop");
+          $shadowTop.toggleClass("shadowTop " + (fIsFirstCol ? "shadowAll" : "shadowTopLeftCorner"));
         }
       }
       else
       {
-        $(".shadowBottomRight").toggleClass("shadowBottomRight shadowBottom");
-        strShadowClass = col === Layer.cols - 1 ? "shadowBottom" : "shadowBottomRight";
-        if (row > 0)
+        if (fIsLastCol && !fIsLastRow)
         {
-          this.getSquare(row - 1, col).removeClass("shadowBottom");
+          strShadowClass = "shadowBottom";
+        }
+        else if (!fIsLastRow)
+        {
+          strShadowClass = "shadowBottomRight";
+        }
+        else
+        {
+          $table.find(".shadowRight").toggleClass("shadowRight shadowAll");
+          if (!fIsLastCol)
+          {
+            strShadowClass = "shadowRight";
+          }
+        }            
+
+        $table.find(".shadowBottomRight").toggleClass("shadowBottomRight shadowBottom");
+        if (!fIsFirstRow)
+        {
+          $table.find(".shadowBottomRightCorner").toggleClass("shadowBottomRightCorner shadowAll");
+          var $shadowBottom = this.getSquare(row - 1, col, $table).find(".shadowBottom");
+          $shadowBottom.toggleClass("shadowBottom " + (fIsLastCol ? "shadowAll" : "shadowBottomRightCorner"));
         }
       }
 
-      $td.addClass(strShadowClass + " deep");
+      if (strShadowClass)
+      {
+        var $firstLayer = $td.find(">:first-child");
+        if ($firstLayer.length)
+        {
+          $firstLayer.addClass(strShadowClass);
+        }
+        else
+        {
+          var $newLayer = $("<div/>", { class: "layer " + strShadowClass});
+          $td.append($newLayer);
+        }
+      }
     }
 
     return $td;
