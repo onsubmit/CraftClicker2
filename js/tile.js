@@ -126,10 +126,9 @@ $.extend(Tile.prototype,
   drawSquare: function(row, col, level, square, isDeep)
   {
     var $table = this.getTable();
-    var strImagePath = square.item.image || "images/" + square.item.name + ".png";
     var $td = $("<td/>") .attr("data-spos", row + "," + col)
       .attr("title", square.item.name)
-      .css("background", "url('" + strImagePath + "')");
+      .css("background", "url('" + square.item.image + "')");
 
     if (square.clusterSize > 1)
     {

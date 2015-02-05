@@ -7,6 +7,7 @@ Item = function(oArgs)
   this.recipe = oArgs.recipe;
   this.gather = oArgs.gather;
   this.image = oArgs.image;
+  this.pluralSuffix = oArgs.pluralSuffix;
 };
 
 $.extend(Item.prototype,

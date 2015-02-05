@@ -13,12 +13,31 @@ if (!Math.randomInt)
   }
 }
 
+if (!String.prototype.trimStart)
+{
+  String.prototype.trimStart = function(c)
+  {
+    c = c || ' ';
+    for (var i = 0, length = this.length; i < length && this.charAt(i) == c; i++) { /* empty */ }
+    return this.substring(i);
+  }
+}
+
+if (!String.prototype.trimEnd)
+{
+  String.prototype.trimEnd = function(c)
+  {
+    c = c || ' ';
+    for (var i = this.length - 1; i >= 0 && this.charAt(i) == c; i--) { /* empty */ }
+    return this.substr(0, i + 1);
+  }
+}
+
 if (!Array.prototype.assignEach)
 {
   Array.prototype.assignEach = function(f)
   {
-    var length = this.length;
-    for(var i = 0; i < length; i++)
+    for(var i = 0, length = this.length; i < length; i++)
     {
       this[i] = f();
     }

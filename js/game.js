@@ -29,6 +29,22 @@ $.extend(Game.prototype,
   {
     return $("#world");
   },
+  getInventoryList: function()
+  {
+    return $("#inventoryList");
+  },
+  getInventoryItem: function(itemId)
+  {
+    return $("#inv" + itemId);
+  },
+  getInventoryAmount: function(itemId)
+  {
+    return $("#inva" + itemId);
+  },
+  getInventoryIcon: function(itemId)
+  {
+    return $("#invi" + itemId);
+  },
   getSaveData: function()
   {
     var objGame = btoa(JSON.stringify(game));
@@ -193,7 +209,83 @@ $.extend(Game.prototype,
     if (arrDrops)
     {
       this.player.inventory.merge(arrDrops);
+      this.drawInventory(arrDrops);
     }
+  },
+  drawInventory: function(arrDrops)
+  {
+    var self = this;
+    var $list = this.getInventoryList();
+
+    arrDrops.forEach(function(drop)
+    {
+      var $item = self.getInventoryItem(drop.item.id);
+      if (!$item.length)
+      {
+        var $icon = $("<div/>", 
+                    {
+                      id: "invi" + drop.item.id,
+                      class: "invIcon floatLeft",
+                      style: "background: url('" + drop.item.image + "')"
+                    }).append($("<div/>",
+                      {
+                        id: "inva" + drop.item.id,
+                        class: "invAmount"
+                      })
+                    );
+
+        var $name = $("<div/>",
+                    {
+                      class: "invName",
+                      text: drop.item.name
+                    });
+
+        $item = $("<li/>", 
+                {
+                  id: "inv" + drop.item.id,
+                }).attr("data-invid", drop.item.id).attr("data-invname", drop.item.name)
+                .append($icon).append($name);
+
+        var $insertBefore = null;
+        $("li[id*='inv']").each(function()
+        {
+          var strName = $(this).attr("data-invname");
+          if (strName > drop.item.name)
+          {
+            var id = parseInt($(this).attr("data-invid"));
+            $insertBefore = $(this);
+            return false;
+          }
+        });
+
+        if ($insertBefore)
+        {
+          $item.insertBefore($insertBefore);
+        }
+        else
+        {
+          $list.append($item);
+        }
+      }
+
+      var amount = self.player.inventory.items[drop.item.id];
+      var strTitle = Number(amount).toLocaleString('en') + " " + drop.item.name + (amount !== 1 ? drop.item.pluralSuffix : "");
+      self.getInventoryIcon(drop.item.id).attr("title", strTitle);
+      self.getInventoryAmount(drop.item.id).text(self.getAmountForBadge(amount));
+    });
+  },
+  getAmountForBadge: function(amount)
+  {
+    if (amount < 1e3)  return amount;
+    if (amount < 1e6)  return (amount / 1e3).toString().substr(0, 3).trimEnd(".") + "k";
+    if (amount < 1e9)  return (amount / 1e6).toString().substr(0, 3).trimEnd(".") + "M";
+    if (amount < 1e12) return (amount / 1e9).toString().substr(0, 3).trimEnd(".") + "G";
+    if (amount < 1e15) return (amount / 1e12).toString().substr(0, 3).trimEnd(".") + "T";
+    if (amount < 1e15) return (amount / 1e12).toString().substr(0, 3).trimEnd(".") + "P";
+    if (amount < 1e18) return (amount / 1e15).toString().substr(0, 3).trimEnd(".") + "E";
+    if (amount < 1e21) return (amount / 1e18).toString().substr(0, 3).trimEnd(".") + "Z";
+    if (amount < 1e24) return (amount / 1e21).toString().substr(0, 3).trimEnd(".") + "Y";
+    return "\u221E";
   },
   drawItems: function()
   {
@@ -204,7 +296,7 @@ $.extend(Game.prototype,
       {
         var $img = $("<img/>",
         {
-          src: "images/" + item.name + ".png",
+          src: item.image,
           class: "item",
           title: item.name
         }).appendTo($itemList);

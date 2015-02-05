@@ -56,6 +56,7 @@ Items.add(
 Items.add(
 {
   name: "Sapling",
+  pluralSuffix: "s"
 });
 
 Items.add({ name: "Wood" });
@@ -63,6 +64,7 @@ Items.add({ name: "Wood" });
 Items.add(
 {
   name: "Wood Plank",
+  pluralSuffix: "s",
   recipe: new Recipe(
   {
     makes: 4,
@@ -79,6 +81,7 @@ Items.add(
 Items.add(
 {
   name: "Stick",
+  pluralSuffix: "s",
   recipe: new Recipe(
   {
     makes: 2,
@@ -95,6 +98,7 @@ Items.add(
 Items.add(
 {
   name: "Workbench",
+  pluralSuffix: "es",
   recipe: new Recipe(
   {
     ingredients:
@@ -145,4 +149,10 @@ Items.add(
 {
   name: "Solidite",
   hardness: -1
+});
+
+Items.forEach(function(item)
+{
+  item.image = item.image || "images/" + item.name + ".png";
+  item.pluralSuffix = item.pluralSuffix || "";
 });

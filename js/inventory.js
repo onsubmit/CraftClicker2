@@ -11,13 +11,13 @@ $.extend(Inventory.prototype,
     arrDrops.forEach(function(drop)
     {
       var amount = drop.amount || 1;
-      if (self.items[drop.item.name])
+      if (self.items[drop.item.id])
       {
-        self.items[drop.item.name] += amount;
+        self.items[drop.item.id] += amount;
       }
       else
       {
-        self.items[drop.item.name] = amount;
+        self.items[drop.item.id] = amount;
       }
     });
   },
