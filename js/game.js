@@ -1,3 +1,5 @@
+preloadImages();
+
 function Game(oArgs)
 {
   this._minAnimationDuration = 1;
@@ -206,7 +208,7 @@ $.extend(Game.prototype,
           class: "item",
           title: item.name
         }).appendTo($itemList);
-      }
+      };
     });
   }
 });
@@ -229,3 +231,25 @@ $(document).keypress(function(e) {
     game.gather();
   }
 });
+
+function preloadImages()
+{
+  var images =
+  [
+    "shadows/Bottom",
+    "shadows/BottomRight",
+    "shadows/BottomRightCorner",
+    "shadows/DepthShade",
+    "shadows/Left",
+    "shadows/Right",
+    "shadows/Top",
+    "shadows/TopLeft",
+    "shadows/TopLeftCorner"
+  ];
+
+  Items.forEach(function(item) { images.push(item.name); });
+  images.forEach(function(itemName)
+  {
+    setTimeout(function() { (new Image()).src = "images/" + itemName + ".png"; }, 1000);
+  });
+}
