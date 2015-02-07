@@ -1,7 +1,9 @@
 <html>
   <head>
     <title>CraftClicker2 0.01 alpha</title>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <script src="js/jquery.ui.touch-punch.min.js"></script>
     <script type="text/javascript" src="js/extensions.js"></script>
     <script type="text/javascript" src="js/item.js"></script>
     <script type="text/javascript" src="js/recipe.js"></script>
@@ -19,13 +21,26 @@
   <body>
     <div id="inventoryContainer">
       <div id="inventory" class="window">
+        <h1>Crafting</h1>
+        <table id="craftingTable">
+          <tr>
+            <td><div class="accept"></div></td>
+            <td><div class="accept"></div></td>
+          </tr>
+          <tr>
+            <td><div class="accept"></div></td>
+            <td><div class="accept"></div></td>
+            </tr>
+          </table>
         <h1>Inventory</h1>
+        <input id="inventoryFilter" class="filter" type="textbox" />
         <ul id="inventoryList"></ul>
       </div>
     </div>
     <div id="itemsContainer">
       <div id="items" class="window">
         <h1>Items</h1>
+        <input id="itemFilter" class="filter" type="textbox" />
         <div id="itemList"></div>
       </div>
     </div>

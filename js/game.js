@@ -29,6 +29,18 @@ $.extend(Game.prototype,
   {
     return $("#world");
   },
+  getWorldContainer: function()
+  {
+    return $("#worldContainer");
+  },
+  getInventoryContainer: function()
+  {
+    return $("#inventoryContainer");
+  },
+  getInventoryFilter: function()
+  {
+    return $("#inventoryFilter");
+  },
   getInventoryList: function()
   {
     return $("#inventoryList");
@@ -44,6 +56,14 @@ $.extend(Game.prototype,
   getInventoryIcon: function(itemId)
   {
     return $("#invi" + itemId);
+  },
+  getItemFilter: function()
+  {
+    return $("#itemFilter");
+  },
+  getItemList: function()
+  {
+    return $("#itemList");
   },
   getSaveData: function()
   {
@@ -203,6 +223,66 @@ $.extend(Game.prototype,
       }
     })();
   },
+  setupFilters: function()
+  {
+    var self = this;
+    var itemFilter = function($parent, filter)
+    {
+      filter = (filter && filter.toLowerCase()) || "";
+
+      var $listItems = $parent.find(".filterableItem");
+      var $itemsToHide = $listItems.filter(function()
+      {
+        return $(this).attr("data-itemname").toLowerCase().indexOf(filter) === -1;
+      });
+
+      var $itemsToShow = $listItems.filter(function()
+      {
+        return $(this).attr("data-itemname").toLowerCase().indexOf(filter) > -1;
+      });
+
+      return {
+        $itemsToHide: $itemsToHide,
+        $itemsToShow: $itemsToShow
+      };
+    };
+
+    var $inventoryFilter = game.getInventoryFilter();
+    $inventoryFilter
+      .keypress(function(e) { e.stopPropagation(); })
+      .keyup(
+        {
+          filterFunc: itemFilter,
+          $elTb: $inventoryFilter,
+          $parent: self.getInventoryList()
+        }, function(e)
+      {
+        e.stopPropagation();
+        game.filter(e);
+      });
+
+    var $itemFilter = game.getItemFilter();
+    $itemFilter
+      .keypress(function(e) { e.stopPropagation(); })
+      .keyup(
+        {
+          filterFunc: itemFilter,
+          $elTb: $itemFilter,
+          $parent: self.getItemList()
+        }, function(e)
+      {
+        e.stopPropagation();
+        game.filter(e);
+      });
+  },
+  filter: function(e)
+  {
+    var $elTb = e.data.$elTb;
+    var filter = $elTb.val();
+    var items = e.data.filterFunc(e.data.$parent, filter);
+    items.$itemsToHide.hide();
+    items.$itemsToShow.show();
+  },
   gather: function()
   {
     var arrDrops = this.world.getTile(this.player.vector.row, this.player.vector.col).gather();
@@ -225,14 +305,30 @@ $.extend(Game.prototype,
         var $icon = $("<div/>", 
                     {
                       id: "invi" + drop.item.id,
-                      class: "invIcon floatLeft",
+                      class: "iconImage floatLeft",
                       style: "background: url('" + drop.item.image + "')"
-                    }).append($("<div/>",
+                    }).attr("data-item", drop.item.name)
+                      .append($("<div/>",
                       {
                         id: "inva" + drop.item.id,
-                        class: "invAmount"
+                        class: "iconAmount"
                       })
-                    );
+                    ).draggable({
+                      containment: self.getInventoryContainer(),
+                      snap: ".accept",
+                      snapMode: "inner",
+                      snapTolerance: 10,
+                      distance: 10,
+                      cursor: "move",
+                      cursorAt: { bottom: -10, right: -10 },
+                      helper: "clone",
+                      opacity: 0.9,
+                      scroll: false,
+                      drag: function(event, ui)
+                      {
+                        //var itemName = $(ui.draggable).attr("data-item");
+                      }
+                    });
 
         var $name = $("<div/>",
                     {
@@ -243,13 +339,14 @@ $.extend(Game.prototype,
         $item = $("<li/>", 
                 {
                   id: "inv" + drop.item.id,
-                }).attr("data-invid", drop.item.id).attr("data-invname", drop.item.name)
+                  class: "invListItem filterableItem"
+                }).attr("data-invid", drop.item.id).attr("data-itemname", drop.item.name)
                 .append($icon).append($name);
 
         var $insertBefore = null;
         $("li[id*='inv']").each(function()
         {
-          var strName = $(this).attr("data-invname");
+          var strName = $(this).attr("data-itemname");
           if (strName > drop.item.name)
           {
             var id = parseInt($(this).attr("data-invid"));
@@ -276,15 +373,21 @@ $.extend(Game.prototype,
   },
   getAmountForBadge: function(amount)
   {
+    var format = function(display, suffix)
+    {
+      return display.toString().substr(0, 3).trimEnd(".") + suffix;
+    };
+
     if (amount < 1e3)  return amount;
-    if (amount < 1e6)  return (amount / 1e3).toString().substr(0, 3).trimEnd(".") + "k";
-    if (amount < 1e9)  return (amount / 1e6).toString().substr(0, 3).trimEnd(".") + "M";
-    if (amount < 1e12) return (amount / 1e9).toString().substr(0, 3).trimEnd(".") + "G";
-    if (amount < 1e15) return (amount / 1e12).toString().substr(0, 3).trimEnd(".") + "T";
-    if (amount < 1e15) return (amount / 1e12).toString().substr(0, 3).trimEnd(".") + "P";
-    if (amount < 1e18) return (amount / 1e15).toString().substr(0, 3).trimEnd(".") + "E";
-    if (amount < 1e21) return (amount / 1e18).toString().substr(0, 3).trimEnd(".") + "Z";
-    if (amount < 1e24) return (amount / 1e21).toString().substr(0, 3).trimEnd(".") + "Y";
+    if (amount < 1e6)  return format(amount / 1e3, "k");
+    if (amount < 1e9)  return format(amount / 1e6, "M");
+    if (amount < 1e12) return format(amount / 1e9, "G");
+    if (amount < 1e15) return format(amount / 1e12, "T");
+    if (amount < 1e15) return format(amount / 1e12, "P");
+    if (amount < 1e18) return format(amount / 1e15, "E");
+    if (amount < 1e21) return format(amount / 1e18, "Z");
+    if (amount < 1e24) return format(amount / 1e21, "Y");
+
     return "\u221E";
   },
   drawItems: function()
@@ -297,9 +400,10 @@ $.extend(Game.prototype,
         var $img = $("<img/>",
         {
           src: item.image,
-          class: "item",
+          class: "itemListItem filterableItem",
           title: item.name
-        }).appendTo($itemList);
+        }).attr("data-itemname", item.name)
+        .appendTo($itemList);
       };
     });
   }
@@ -315,14 +419,46 @@ $(document).ready(function()
   game.getZoomIn().click(function() { game.zoomIn(); });
   game.getZoomOut().click(function() { game.zoomOut(); });
   game.getGather().click(function() { game.gather(); });
-});
+  game.setupFilters();
 
-$(document).keypress(function(e) {
-  e.preventDefault(); // Prevent page down on hitting space bar
-  if (e.which == 71 || e.which == 103 && game.getGather().isVisible()) { // '[Gg]'
-    game.gather();
-  }
-});
+  $(".accept").droppable(
+              {
+                accept: ".iconImage",
+                tolerance: "touch",
+                drop: function(event, ui)
+                {
+                  var itemName = $(ui.draggable).attr("data-item");
+                  var item = Items.get(itemName);
+                  var $icon = $("<div/>", 
+                    {
+                      id: "c" + item.id,
+                      class: "iconImage",
+                      style: "background: url('" + item.image + "')"
+                    }).attr("data-item", item.name)
+                      .append($("<div/>",
+                        {
+                          id: "c" + item.id,
+                          class: "iconAmount"
+                        })//.text(1)
+                      );
+                  $(event.target).empty().append($icon);
+                }
+              });
+  });
+
+  $(document).keypress(function(e)
+  { 
+    var tag = e.target.tagName.toLowerCase();
+    if (tag === "input" || tag === "textarea")
+    {
+      return;
+    }
+
+    //e.preventDefault(); // Prevent page down on hitting space bar
+    if (e.which == 71 || e.which == 103 && game.getGather().isVisible()) { // '[Gg]'
+      game.gather();
+    }
+  });
 
 function preloadImages()
 {
@@ -336,7 +472,8 @@ function preloadImages()
     "shadows/Right",
     "shadows/Top",
     "shadows/TopLeft",
-    "shadows/TopLeftCorner"
+    "shadows/TopLeftCorner",
+    "shadows/CraftingTable"
   ];
 
   Items.forEach(function(item) { images.push(item.name); });

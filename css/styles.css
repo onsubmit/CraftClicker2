@@ -10,12 +10,13 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background-color: #aaa;  
+  background-color: #aaa;
+  overflow: hidden;
 }
 
 h1, h2, h3, h4, h5, h6, p {
   padding: 0;
-  margin: 0 0 6px 0;
+  margin: 0 0 10px 0;
 }
 
 #inventoryContainer {
@@ -25,11 +26,39 @@ h1, h2, h3, h4, h5, h6, p {
   height: 100%;
 }
 
+#craftingTable {
+  empty-cells: show;
+  border-spacing: 0px;
+  background-color: #fff;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#craftingTable td {
+  width: 24px;
+  height: 32px;
+  min-width: 24px;
+  min-height: 32px;
+  margin: 0;
+  padding: 5px 3px 3px 5px;
+  background-color: #c0c0c0;
+  background-image: url('../images/shadows/CraftingTable.png');
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+}
+
+div.accept {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+}
+
 #inventoryList {
-  padding: 4px 0 0 0;
+  padding: 0;
   margin: 0;
   list-style-type: none;
-  overflow-y: auto;
+  //overflow-y: auto;
   height: calc(100% - 20px);
 }
 
@@ -39,13 +68,14 @@ h1, h2, h3, h4, h5, h6, p {
   margin-top: 4px;
 }
 
-.invIcon {
+.iconImage {
   width: 24px;
   height: 24px;
   position: relative;
+  z-index: 100;
 }
 
-.invAmount {
+.iconAmount {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -153,42 +183,42 @@ table.tile td div.shadowTop {
   background: url('../images/shadows/Top.png');
 }
 
-table.tile td div.shadowTopLeft {
+.shadowTopLeft {
   color: #333;
   background: url('../images/shadows/TopLeft.png');
 }
 
-table.tile td div.shadowTopLeftCorner {
+.shadowTopLeftCorner {
   color: #333;
   background: url('../images/shadows/TopLeftCorner.png');
 }
 
-table.tile td div.shadowBottom {
+.shadowBottom {
   color: #333;
   background: url('../images/shadows/Bottom.png');
 }
 
-table.tile td div.shadowBottomRight {
+.shadowBottomRight {
   color: #333;
   background: url('../images/shadows/BottomRight.png');
 }
 
-table.tile td div.shadowBottomRightCorner {
+.shadowBottomRightCorner {
   color: #333;
   background: url('../images/shadows/BottomRightCorner.png');
 }
 
-table.tile td div.shadowRight {
+.shadowRight {
   color: #333;
   background: url('../images/shadows/Right.png');
 }
 
-table.tile td div.shadowLeft {
+.shadowLeft {
   color: #333;
   background: url('../images/shadows/Left.png');
 }
 
-table.tile td div.shadowAll {
+.shadowAll {
   color: #333;
   background: url('../images/shadows/DepthShade.png');
 }
@@ -210,7 +240,7 @@ table.tile td div.shadowAll {
   height: calc(100% - 20px);
 }
 
-img.item {
+img.itemListItem {
   margin: 4px;
 }
 
@@ -228,6 +258,21 @@ img.item {
   height: calc(100% - 50px);
   margin: 5px;
   padding: 12px;
+}
+
+.filter {
+  width: 100%;
+  font-size: 1em;
+  font-family: georgia, arial, helvetica, sans-serif;
+  border: 0;
+  box-shadow: 0px 0px 10px #bbb;
+  height: 2em;
+  padding-left: 0.5em;
+  margin-bottom: 8px;
+}
+
+input[type=textbox] {
+
 }
 
 button {

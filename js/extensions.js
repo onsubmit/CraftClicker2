@@ -102,3 +102,11 @@ if (!jQuery.fn.isVisible)
     return $(this).is(':visible');
   }
 }
+
+if (!jQuery.fn.hasFocus)
+{
+  jQuery.fn.hasFocus = function()
+  {
+    return $(this).is(':focus');
+  }
+}
