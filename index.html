@@ -15,44 +15,55 @@
     <script type="text/javascript" src="js/world.js"></script>
     <script type="text/javascript" src="js/game.js"></script>
     <script type="text/javascript" src="js/tests.js"></script>
-    <link type="text/css" href="css/styles.css" rel="stylesheet"  />
+    <link type="text/css" href="css/styles.css" rel="stylesheet" />
     <link rel="shortcut icon" href="favicon.ico" />
   </head>
   <body>
-    <div id="inventoryContainer">
+    <div id="leftColumn">
       <div id="inventory" class="window">
         <h1>Crafting</h1>
-        <table id="craftingTable">
-          <tr>
-            <td><div class="accept"></div></td>
-            <td><div class="accept"></div></td>
-          </tr>
-          <tr>
-            <td><div class="accept"></div></td>
-            <td><div class="accept"></div></td>
+        <div id="craftingContainer">
+          <table id="craftingTable">
+            <tr>
+              <td><div class="accept"></div></td>
             </tr>
           </table>
-        <h1>Inventory</h1>
-        <input id="inventoryFilter" class="filter" type="textbox" />
-        <ul id="inventoryList"></ul>
+          <div>
+            <div id="craftArrow">
+              <button id="clearCraft">x</button><br />
+              <img src="images/ArrowRight.png" />
+            </div>
+            <table id="craftingOutputTable">
+              <tr>
+                <td class="craftingCell"><div id="craftingOutput"></div></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div id="inventoryContainer" class="clearBoth">
+          <h1>Inventory</h1>
+          <input id="inventoryFilter" class="filter" type="textbox" placeholder="Filter" />
+          <label id="inventoryMoveStacksLabel"><input id="inventoryMoveStacks" type="checkbox" />Drag stacks</label>
+          <ul id="inventoryList"></ul>
+        </div>
       </div>
     </div>
-    <div id="itemsContainer">
+    <div id="rightColumn">
       <div id="items" class="window">
         <h1>Items</h1>
-        <input id="itemFilter" class="filter" type="textbox" />
+        <input id="itemFilter" class="filter" type="textbox" placeholder="Filter" />
         <div id="itemList"></div>
       </div>
     </div>
-    <div id="middle">
+    <div id="middleColumn">
       <div id="worldContainer">
         <table id="world"></table>
         <div id="buttons">
-          <button id="zoomIn">Zoom in</button>
+          <button id="zoomIn" class="big">Zoom to tile</button>
         </div>
       </div>
       <div id="tileContainer">
-        <button id="gather">Gather</button><button id="zoomOut">Zoom out</button>
+        <button id="gather" class="big">Gather</button><button id="zoomOut" class="big">Return to world</button>
       </div>
     </div>
     <!--<button onclick="game.save()">Save</button>

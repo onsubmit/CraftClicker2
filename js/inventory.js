@@ -21,8 +21,26 @@ $.extend(Inventory.prototype,
       }
     });
   },
+  consume: function(arrIngredients)
+  {
+    // WARNING! This method does ABSOLUTELY NO bounds checking on the ingredients (on purpose).
+    // WARNING! The UI should prevent the player from consuming items they don't actually have.
+    var self = this;
+    arrIngredients.foreach2d(function(ingredient)
+    {
+      if (ingredient)
+      {
+        var amount = ingredient.amount || 1;
+        self.items[ingredient.item.id] -= amount
+      }
+    });
+  },
   toString: function()
   {
-    return "";
+    for (var id in this.items)
+    {
+      var item = Items.get(id);
+      console.log(item.name + ": " + this.items[id]);
+    }
   }
 });

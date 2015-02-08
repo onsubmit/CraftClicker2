@@ -12,6 +12,10 @@ body {
   height: 100%;
   background-color: #aaa;
   overflow: hidden;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 h1, h2, h3, h4, h5, h6, p {
@@ -19,22 +23,25 @@ h1, h2, h3, h4, h5, h6, p {
   margin: 0 0 10px 0;
 }
 
-#inventoryContainer {
+#leftColumn {
   float: left;
   width: 20%;
   min-width: 250px;
   height: 100%;
 }
 
+#craftingContainer {
+  padding-top: 10px;
+  padding-bottom: 20px;
+}
+
 #craftingTable {
   empty-cells: show;
   border-spacing: 0px;
-  background-color: #fff;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  float: left;
 }
 
-#craftingTable td {
+#craftingTable td, td.craftingCell {
   width: 24px;
   height: 32px;
   min-width: 24px;
@@ -47,11 +54,39 @@ h1, h2, h3, h4, h5, h6, p {
   border-bottom: 2px solid #fff;
 }
 
-div.accept {
+div.accept, div#craftingOutput {
   width: 24px;
   height: 24px;
   min-width: 24px;
   min-height: 24px;
+}
+
+#clearCraft {
+  color: #fff;
+  font-family: consolas, monospace;
+  font-weight: bold;
+  text-align: center;
+  width: 16px;
+  min-width: 16px;
+  padding: 0;
+  margin-bottom: 4px;
+  background-color: transparent;
+  border: 0;
+  text-shadow: 1px 1px #000;
+}
+
+#craftArrow {
+  padding: 0px 5px 0 5px;
+  float: left;
+}
+
+#craftingOutputTable {
+  empty-cells: show;
+  border-spacing: 0px;
+}
+
+#inventoryContainer {
+  display: none;
 }
 
 #inventoryList {
@@ -94,7 +129,11 @@ div.accept {
   margin-left: 30px;
 }
 
-#middle {
+#inventoryMoveStacksLabel {
+  float: right;
+}
+
+#middleColumn {
   margin: 0;
   height: calc(100% - 20px);
   padding: 10px;
@@ -228,7 +267,7 @@ table.tile td div.shadowTop {
   z-index: 2;
 }
 
-#itemsContainer {
+#rightColumn {
   float: right;
   width: 20%;
   min-width: 250px;
@@ -246,6 +285,10 @@ img.itemListItem {
 
 .floatLeft {
   float: left;
+}
+
+.clearBoth {
+  clear: both;
 }
 
 .window {
@@ -271,16 +314,16 @@ img.itemListItem {
   margin-bottom: 8px;
 }
 
-input[type=textbox] {
-
-}
-
-button {
+button.big {
   height: 40px;
-  font-size: 1.2em;
+  font-size: 1.0em;
   font-weight: bold;
   text-align: center;
   box-shadow: 0px 0px 8px #666;
   border: 1px solid #666;
   margin: 8px 8px 8px 0;
+}
+
+input[type=checkbox] {
+  vertical-align: -2px;
 }

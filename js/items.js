@@ -4,6 +4,7 @@ $.extend(Items,
 {
   _items: [],
   _nameMap: {},
+  stackSize: 64,
   add: function(oArgs)
   {
     if (Items._nameMap[oArgs.name])
@@ -33,6 +34,14 @@ $.extend(Items,
   forEach: function(f)
   {
     this._items.forEach(f);
+  },
+  every: function(f)
+  {
+    this._items.every(f);
+  },
+  some: function(f)
+  {
+    this._items.some(f);
   }
 });
 
@@ -63,17 +72,18 @@ Items.add({ name: "Wood" });
 
 Items.add(
 {
-  name: "Wood Plank",
-  pluralSuffix: "s",
+  name: "Lumber",
   recipe: new Recipe(
   {
     makes: 4,
     ingredients:
     [
-      {
-        item: Items.get("Wood"),
-        amount: 1
-      }
+      [
+        {
+          item: Items.get("Wood"),
+          amount: 1
+        }
+      ]
     ]
   })
 });
@@ -85,12 +95,52 @@ Items.add(
   recipe: new Recipe(
   {
     makes: 2,
+    isShaped: false,
     ingredients:
     [
-      {
-        item: Items.get("Wood Plank"),
-        amount: 1
-      }
+      [
+        {
+          item: Items.get("Lumber"),
+          amount: 1
+        },
+        {
+          item: Items.get("Lumber"),
+          amount: 1
+        }
+      ]
+    ]
+  })
+});
+
+Items.add(
+{
+  name: "Wood Plank",
+  pluralSuffix: "s",
+  recipe: new Recipe(
+  {
+    makes: 2,
+    ingredients:
+    [
+      [
+        {
+          item: Items.get("Lumber"),
+          amount: 1
+        },
+        {
+          item: Items.get("Lumber"),
+          amount: 1
+        }
+      ],
+      [
+        {
+          item: Items.get("Lumber"),
+          amount: 1
+        },
+        {
+          item: Items.get("Lumber"),
+          amount: 1
+        }
+      ]
     ]
   })
 });
@@ -105,22 +155,8 @@ Items.add(
     [
       [
         {
-          item: Items.get("Wood Plank"),
-          amount: 1
-        },
-        {
-          item: Items.get("Stick"),
-          amount: 1
-        }
-      ],
-      [
-        {
-          item: Items.get("Stick"),
-          amount: 1
-        },
-        {
-          item: Items.get("Wood Plank"),
-          amount: 1
+          item: Items.get("Lumber"),
+          amount: 6
         }
       ]
     ]

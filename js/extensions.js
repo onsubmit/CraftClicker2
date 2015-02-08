@@ -39,7 +39,7 @@ if (!Array.prototype.assignEach)
   {
     for(var i = 0, length = this.length; i < length; i++)
     {
-      this[i] = f();
+      this[i] = f(i);
     }
 
     return this;
@@ -56,6 +56,73 @@ if (!Array.prototype.pushIf)
     }
 
     return this;
+  }
+}
+
+if (!Array.prototype.pushUnique)
+{
+  Array.prototype.pushUnique = function(item)
+  {
+    return this.pushIf($.inArray(item, this) === -1, item);
+  }
+}
+
+if (!Array.prototype.foreach2d)
+{
+  Array.prototype.foreach2d = function(f)
+  {
+    for (var row = 0, rows = this.length; row < rows; row++)
+    {
+      for (var col = 0, cols = this[row].length; col < cols; col++)
+      {
+        var item = this[row][col];
+        var retVal = f(item);
+        if (typeof retVal !== "undefined")
+        {
+          return retVal;
+        }
+      }
+    }
+  }
+}
+
+if (!Array.prototype.some2d)
+{
+  Array.prototype.some2d = function(f)
+  {
+    for (var row = 0, rows = this.length; row < rows; row++)
+    {
+      for (var col = 0, cols = this[row].length; col < cols; col++)
+      {
+        var item = this[row][col];
+        if (f(item))
+        {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+}
+
+if (!Array.prototype.every2d)
+{
+  Array.prototype.every2d = function(f)
+  {
+    for (var row = 0, rows = this.length; row < rows; row++)
+    {
+      for (var col = 0, cols = this[row].length; col < cols; col++)
+      {
+        var item = this[row][col];
+        if (!f(item))
+        {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 }
 

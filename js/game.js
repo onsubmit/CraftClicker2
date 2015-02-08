@@ -33,13 +33,37 @@ $.extend(Game.prototype,
   {
     return $("#worldContainer");
   },
+  getCraftingTable: function()
+  {
+    return $("#craftingTable");
+  },
+  getCellsFromCraftingTable: function()
+  {
+    return $(".crafting.dropped");
+  },
+  getItemInOutput: function()
+  {
+    return $(".crafted");
+  },
+  getCraftingOutput: function()
+  {
+    return $("#craftingOutput");
+  },
   getInventoryContainer: function()
   {
     return $("#inventoryContainer");
   },
+  getLeftColumn: function()
+  {
+    return $("#leftColumn");
+  },
   getInventoryFilter: function()
   {
     return $("#inventoryFilter");
+  },
+  getIsInventoryMoveStacksChecked: function()
+  {
+    return $("#inventoryMoveStacks").is(":checked");
   },
   getInventoryList: function()
   {
@@ -64,6 +88,18 @@ $.extend(Game.prototype,
   getItemList: function()
   {
     return $("#itemList");
+  },
+  getClearCraft: function()
+  {
+    return $("#clearCraft");
+  },
+  clearCraftingTable: function()
+  {
+    this.getCellsFromCraftingTable().remove();
+  },
+  clearCraftingOutput: function()
+  {
+    return this.getCraftingOutput().empty();
   },
   getSaveData: function()
   {
@@ -295,6 +331,7 @@ $.extend(Game.prototype,
   drawInventory: function(arrDrops)
   {
     var self = this;
+    this.getInventoryContainer().fadeIn();
     var $list = this.getInventoryList();
 
     arrDrops.forEach(function(drop)
@@ -314,7 +351,8 @@ $.extend(Game.prototype,
                         class: "iconAmount"
                       })
                     ).draggable({
-                      containment: self.getInventoryContainer(),
+                      containment: self.getLeftColumn(),
+                      appendTo: self.getLeftColumn(),
                       snap: ".accept",
                       snapMode: "inner",
                       snapTolerance: 10,
@@ -324,9 +362,33 @@ $.extend(Game.prototype,
                       helper: "clone",
                       opacity: 0.9,
                       scroll: false,
-                      drag: function(event, ui)
+                      start: function(event, ui)
                       {
-                        //var itemName = $(ui.draggable).attr("data-item");
+                        var $amount = $(ui.helper).find(".iconAmount");
+                        var doDragStacks = self.getIsInventoryMoveStacksChecked();
+                        if (doDragStacks)
+                        {
+                          var currentAmount = parseInt($amount.text() || 1);
+                          if (currentAmount < Items.stackSize)
+                          {
+                            $amount.text(currentAmount);
+                            var $elDrug = $(event.target);
+                            var item = Items.get($elDrug.attr("data-item"));
+                            self.getInventoryItem(item.id).fadeOut();
+                          }
+                          else
+                          {
+                            $amount.text(Items.stackSize);
+                          }
+
+                          amount = Math.min(amount, Items.stackSize);
+                          
+                        }
+                        else
+                        {
+                          $amount.text(1);
+                          $amount.hide();
+                        }
                       }
                     });
 
@@ -367,6 +429,7 @@ $.extend(Game.prototype,
 
       var amount = self.player.inventory.items[drop.item.id];
       var strTitle = Number(amount).toLocaleString('en') + " " + drop.item.name + (amount !== 1 ? drop.item.pluralSuffix : "");
+      self.getInventoryItem(drop.item.id).show();
       self.getInventoryIcon(drop.item.id).attr("title", strTitle);
       self.getInventoryAmount(drop.item.id).text(self.getAmountForBadge(amount));
     });
@@ -406,6 +469,296 @@ $.extend(Game.prototype,
         .appendTo($itemList);
       };
     });
+  },
+  setupDropTargets: function()
+  {
+    var self = this;
+    $(".accept").droppable(
+                {
+                  accept: ".iconImage",
+                  tolerance: "touch",
+                  drop: function(event, ui)
+                  {
+                    var $elDrug = $(ui.draggable);
+                    var $elClone = $(ui.helper);
+                    var wasFromInventory = !$elDrug.hasClass("crafting")
+                    var itemName = $elDrug.attr("data-item");
+                    var item = Items.get(itemName);
+
+                    if (wasFromInventory)
+                    {
+                      // This event fires for each matched drop target.
+                      // Ensure more than items that what the player has don't get dropped.
+                      var $currentAmount = $elDrug.find(".iconAmount");
+                      var currentAmount = parseInt($elDrug.find(".iconAmount").text() || 1);
+                      var droppedAmount = parseInt($elClone.find(".iconAmount").text() || 1);
+                      if (currentAmount === 1)
+                      {
+                        $currentAmount.hide();
+                      }
+                      else if (currentAmount < 1)
+                      {
+                        self.getInventoryItem(item.id).fadeOut();
+                        return;
+                      }
+
+                      $currentAmount.text(currentAmount - droppedAmount);
+                    }
+
+                    var $icon = $("<div/>",
+                                {
+                                  id: "c" + item.id,
+                                  class: "iconImage crafting",
+                                  style: "background: url('" + item.image + "')"
+                                })
+                                .attr("data-item", item.name)
+                                .append($("<div/>",
+                                  {
+                                    id: "c" + item.id,
+                                    class: "iconAmount",
+                                    text: droppedAmount
+                                  })
+                                ).draggable({
+                                    containment: self.getLeftColumn(),
+                                    snap: ".accept",
+                                    snapMode: "inner",
+                                    snapTolerance: 10,
+                                    distance: 5,
+                                    cursor: "move",
+                                    helper: "clone",
+                                    opacity: 0.9,
+                                    scroll: false,
+                                    start: function(event, ui)
+                                    {
+                                      $(event.target).remove();
+                                      $(ui.helper).removeClass("dropped");
+                                      self.checkRecipe();
+
+                                      // Prevent the player from dragging an ingredient in the crafting table
+                                      // to in-between two (or four) squares, which would duplicate the ingredient.
+                                      // This might be possible to handle, but would be quite complex.
+                                      $(".accept").droppable("option", "tolerance", "fit");
+                                    },
+                                    stop: function(event, ui)
+                                    {
+                                      $(".accept").droppable("option", "tolerance", "touch");
+                                      var $elClone = $(ui.helper);
+                                      if (!$elClone.hasClass("dropped"))
+                                      {
+                                        var itemName = $elClone.attr("data-item");
+                                        var item = Items.get(itemName);
+                                        var $amount = $elClone.find(".iconAmount");
+                                        var amount = parseInt($amount.text() || 1);
+
+                                        var objReclaim = {};
+                                        objReclaim[item.id] = amount;
+                                        self.reclaimIngredients(objReclaim);
+                                      }
+
+                                      $(ui.helper).remove();
+                                      self.checkRecipe();
+                                    }
+                                });
+
+                    $icon.addClass("dropped");
+                    $(ui.helper).addClass("dropped");
+
+                    var $current = $(event.target).find(".iconimage");
+                    if ($current.length)
+                    {
+                      var currentIngredient = Items.get($current.attr("data-item"));
+                      var newIngredient = Items.get($(ui.helper).attr("data-item"));
+
+                      var $parent = $(ui.helper).parent();
+                      if (!$parent.hasClass("accept"))
+                      {
+                        // This happens when the player drops an item from the inventory.
+                        // Swapping requires reclaiming the currently existing ingredient
+                        // back to the inventory.
+                        var $amount = $current.find(".iconAmount");
+                        var amount = parseInt($amount.text() || 1);
+
+                        var objReclaim = {};
+                        objReclaim[currentIngredient.id] = amount;
+                        self.reclaimIngredients(objReclaim);
+                      }
+                      else if (currentIngredient != newIngredient)
+                      {
+                        // There is already a different item in this square. Swap them.
+                        $parent.empty().append($current);
+                      }
+                    }
+
+                    $(event.target).empty().append($icon);
+                    self.checkRecipe();
+
+                    if (wasFromInventory && currentAmount === 0)
+                    {
+                      self.getInventoryItem(item.id).fadeOut();
+                    }
+                  }
+                });
+  },
+  getIngredientsFromCraftingTable: function()
+  {
+    var $ingredients = this.getCellsFromCraftingTable();
+
+    var table = document.getElementById("craftingTable");
+    var rows = table.rows.length;
+    var cols = table.rows[0].cells.length;
+    var arrIngredients = (new Array(rows)).assignEach(function() { return new Array(cols); });
+
+    for (var row = 0; row < rows; row++)
+    {
+      for (var col = 0; col < cols; col++)
+      {
+        var $cell = $(table.rows[row].cells[col]);
+        var $ingredient = $cell.find(".crafting.dropped");
+        if ($ingredient.length)
+        {
+          var item = Items.get($ingredient.attr("data-item"));
+          var amount = parseInt($ingredient.find(".iconAmount").text() || 1);
+          arrIngredients[row][col] = 
+          {
+            item: item,
+            amount: amount
+          };
+        }
+      }
+    }
+
+    return arrIngredients;
+  },
+  checkRecipe: function()
+  {
+    var self = this;
+    this.clearCraftingOutput();
+    var arrIngredients = self.getIngredientsFromCraftingTable();
+    var craftableItem = self.checkIngredients(arrIngredients);
+    if (craftableItem)
+    {
+      var $icon = $("<div/>",
+                  {
+                    class: "crafted iconImage",
+                    style: "background: url('" + craftableItem.item.image + "')"
+                  })
+                  .append($("<div/>",
+                    {
+                      class: "iconAmount"
+                    }).text(craftableItem.item.recipe.makes * craftableItem.amount)
+                  ).mousedown(
+                    {
+                      craftableItem: craftableItem,
+                      arrIngredients: arrIngredients,
+                    }, function(e)
+                    {
+                      var arrDrops = 
+                      [
+                        {
+                          item: e.data.craftableItem.item,
+                          amount: e.data.craftableItem.item.recipe.makes * e.data.craftableItem.amount
+                        }
+                      ];
+
+                      self.player.inventory.consume(e.data.arrIngredients);
+                      self.player.inventory.merge(arrDrops);
+                      self.drawInventory(arrDrops);
+                      self.clearCraftingTable();
+                      self.clearCraftingOutput();
+                    });
+                  
+      this.getCraftingOutput().append($icon);
+    }
+  },
+  checkIngredients: function(arrIngredients)
+  {
+    if (arrIngredients.every2d(function(ingredient) { return !ingredient; }))
+    {
+      return false;
+    }
+
+    var craftableItem = null;
+    var craftableAmount = 0;
+    Items.some(function(item)
+    {
+      craftableAmount = item.recipe && item.recipe.check(arrIngredients);
+      if (craftableAmount)
+      {
+        craftableItem = item;
+      }
+
+      return craftableAmount;
+    });
+
+    if (craftableAmount > 0)
+    {
+      var objRet = 
+      {
+        item: craftableItem,
+        amount: craftableAmount
+      };
+
+      return objRet;
+    }
+    else
+    {
+      return null;
+    }
+  },
+  setupClearCrafting: function()
+  {
+    var self = this;
+    this.getClearCraft().click(function()
+    {
+      var objReclaim = {};
+      var arrIngredients = self.getIngredientsFromCraftingTable();
+      arrIngredients.foreach2d(function(ingredient)
+      {
+        if (!ingredient) return;
+        if (!objReclaim[ingredient.item.id])
+        {
+          objReclaim[ingredient.item.id] = ingredient.amount;
+        }
+        else
+        {
+          objReclaim[ingredient.item.id] += ingredient.amount;
+        }
+      });
+
+      self.reclaimIngredients(objReclaim);
+      self.getCellsFromCraftingTable().fadeOutAndRemove();
+      self.getItemInOutput().fadeOutAndRemove();
+    });
+  },
+  reclaimIngredients: function(objReclaim)
+  {
+    for (var id in objReclaim)
+    {
+      var $item = this.getInventoryItem(id);
+      var $currentAmount = $item.find(".iconAmount");
+      var currentAmount = parseInt($currentAmount.text() || 1);
+      var newAmount = currentAmount + objReclaim[id];
+      $currentAmount.text(newAmount);
+      if (newAmount === 1)
+      {
+        // Don't show a badge when only one exists
+        $currentAmount.hide();
+      }
+
+      if (currentAmount === 0)
+      {
+        if (newAmount !== 1)
+        {
+          $currentAmount.show();
+        }
+
+        $item.fadeIn();
+      }
+      else if (currentAmount === 1)
+      {
+        $currentAmount.show();
+      }
+    }
   }
 });
 
@@ -420,45 +773,23 @@ $(document).ready(function()
   game.getZoomOut().click(function() { game.zoomOut(); });
   game.getGather().click(function() { game.gather(); });
   game.setupFilters();
+  game.setupDropTargets();
+  game.setupClearCrafting();
+});
 
-  $(".accept").droppable(
-              {
-                accept: ".iconImage",
-                tolerance: "touch",
-                drop: function(event, ui)
-                {
-                  var itemName = $(ui.draggable).attr("data-item");
-                  var item = Items.get(itemName);
-                  var $icon = $("<div/>", 
-                    {
-                      id: "c" + item.id,
-                      class: "iconImage",
-                      style: "background: url('" + item.image + "')"
-                    }).attr("data-item", item.name)
-                      .append($("<div/>",
-                        {
-                          id: "c" + item.id,
-                          class: "iconAmount"
-                        })//.text(1)
-                      );
-                  $(event.target).empty().append($icon);
-                }
-              });
-  });
+$(document).keypress(function(e)
+{ 
+  var tag = e.target.tagName.toLowerCase();
+  if (tag === "input" || tag === "textarea")
+  {
+    return;
+  }
 
-  $(document).keypress(function(e)
-  { 
-    var tag = e.target.tagName.toLowerCase();
-    if (tag === "input" || tag === "textarea")
-    {
-      return;
-    }
-
-    //e.preventDefault(); // Prevent page down on hitting space bar
-    if (e.which == 71 || e.which == 103 && game.getGather().isVisible()) { // '[Gg]'
-      game.gather();
-    }
-  });
+  //e.preventDefault(); // Prevent page down on hitting space bar
+  if (e.which == 71 || e.which == 103 && game.getGather().isVisible()) { // '[Gg]'
+    game.gather();
+  }
+});
 
 function preloadImages()
 {
