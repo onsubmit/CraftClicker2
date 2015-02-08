@@ -490,8 +490,9 @@ $.extend(Game.prototype,
                       // This event fires for each matched drop target.
                       // Ensure more than items that what the player has don't get dropped.
                       var $currentAmount = $elDrug.find(".iconAmount");
-                      var currentAmount = parseInt($elDrug.find(".iconAmount").text() || 1);
-                      var droppedAmount = parseInt($elClone.find(".iconAmount").text() || 1);
+                      var $droppedAmount = $elClone.find(".iconAmount");
+                      var currentAmount = parseInt($currentAmount.text() || 1);
+                      var droppedAmount = parseInt($droppedAmount.text() || 1);
                       if (currentAmount === 1)
                       {
                         $currentAmount.hide();
@@ -511,54 +512,62 @@ $.extend(Game.prototype,
                                   class: "iconImage crafting",
                                   style: "background: url('" + item.image + "')"
                                 })
-                                .attr("data-item", item.name)
-                                .append($("<div/>",
+                                .attr("data-item", item.name);
+
+                    var $amount = $("<div/>",
                                   {
                                     id: "c" + item.id,
                                     class: "iconAmount",
-                                    text: droppedAmount
-                                  })
-                                ).draggable({
-                                    containment: self.getLeftColumn(),
-                                    snap: ".accept",
-                                    snapMode: "inner",
-                                    snapTolerance: 10,
-                                    distance: 5,
-                                    cursor: "move",
-                                    helper: "clone",
-                                    opacity: 0.9,
-                                    scroll: false,
-                                    start: function(event, ui)
-                                    {
-                                      $(event.target).remove();
-                                      $(ui.helper).removeClass("dropped");
-                                      self.checkRecipe();
+                                  });
 
-                                      // Prevent the player from dragging an ingredient in the crafting table
-                                      // to in-between two (or four) squares, which would duplicate the ingredient.
-                                      // This might be possible to handle, but would be quite complex.
-                                      $(".accept").droppable("option", "tolerance", "fit");
-                                    },
-                                    stop: function(event, ui)
-                                    {
-                                      $(".accept").droppable("option", "tolerance", "touch");
-                                      var $elClone = $(ui.helper);
-                                      if (!$elClone.hasClass("dropped"))
-                                      {
-                                        var itemName = $elClone.attr("data-item");
-                                        var item = Items.get(itemName);
-                                        var $amount = $elClone.find(".iconAmount");
-                                        var amount = parseInt($amount.text() || 1);
+                    if (droppedAmount !== 1)
+                    {
+                      $amount.text(droppedAmount);
+                    }
 
-                                        var objReclaim = {};
-                                        objReclaim[item.id] = amount;
-                                        self.reclaimIngredients(objReclaim);
-                                      }
+                    $icon.append($amount);
 
-                                      $(ui.helper).remove();
-                                      self.checkRecipe();
-                                    }
-                                });
+                    $icon.draggable({
+                        containment: self.getLeftColumn(),
+                        snap: ".accept",
+                        snapMode: "inner",
+                        snapTolerance: 10,
+                        distance: 5,
+                        cursor: "move",
+                        helper: "clone",
+                        opacity: 0.9,
+                        scroll: false,
+                        start: function(event, ui)
+                        {
+                          $(event.target).remove();
+                          $(ui.helper).removeClass("dropped");
+                          self.checkRecipe();
+
+                          // Prevent the player from dragging an ingredient in the crafting table
+                          // to in-between two (or four) squares, which would duplicate the ingredient.
+                          // This might be possible to handle, but would be quite complex.
+                          $(".accept").droppable("option", "tolerance", "fit");
+                        },
+                        stop: function(event, ui)
+                        {
+                          $(".accept").droppable("option", "tolerance", "touch");
+                          var $elClone = $(ui.helper);
+                          if (!$elClone.hasClass("dropped"))
+                          {
+                            var itemName = $elClone.attr("data-item");
+                            var item = Items.get(itemName);
+                            var $amount = $elClone.find(".iconAmount");
+                            var amount = parseInt($amount.text() || 1);
+
+                            var objReclaim = {};
+                            objReclaim[item.id] = amount;
+                            self.reclaimIngredients(objReclaim);
+                          }
+
+                          $(ui.helper).remove();
+                          self.checkRecipe();
+                        }
+                    });
 
                     $icon.addClass("dropped");
                     $(ui.helper).addClass("dropped");
@@ -641,31 +650,40 @@ $.extend(Game.prototype,
                   {
                     class: "crafted iconImage",
                     style: "background: url('" + craftableItem.item.image + "')"
-                  })
-                  .append($("<div/>",
+                  });
+
+      var $amount = $("<div/>",
                     {
                       class: "iconAmount"
-                    }).text(craftableItem.item.recipe.makes * craftableItem.amount)
-                  ).mousedown(
-                    {
-                      craftableItem: craftableItem,
-                      arrIngredients: arrIngredients,
-                    }, function(e)
-                    {
-                      var arrDrops = 
-                      [
-                        {
-                          item: e.data.craftableItem.item,
-                          amount: e.data.craftableItem.item.recipe.makes * e.data.craftableItem.amount
-                        }
-                      ];
-
-                      self.player.inventory.consume(e.data.arrIngredients);
-                      self.player.inventory.merge(arrDrops);
-                      self.drawInventory(arrDrops);
-                      self.clearCraftingTable();
-                      self.clearCraftingOutput();
                     });
+
+      var amount = craftableItem.item.recipe.makes * craftableItem.amount;
+      if (amount !== 1)
+      {
+        $amount.text(amount);
+      }
+
+      $icon.append($amount);
+      $icon.mousedown(
+      {
+        craftableItem: craftableItem,
+        arrIngredients: arrIngredients,
+      }, function(e)
+      {
+        var arrDrops = 
+        [
+          {
+            item: e.data.craftableItem.item,
+            amount: e.data.craftableItem.item.recipe.makes * e.data.craftableItem.amount
+          }
+        ];
+
+        self.player.inventory.consume(e.data.arrIngredients);
+        self.player.inventory.merge(arrDrops);
+        self.drawInventory(arrDrops);
+        self.clearCraftingTable();
+        self.clearCraftingOutput();
+      });
                   
       this.getCraftingOutput().append($icon);
     }
