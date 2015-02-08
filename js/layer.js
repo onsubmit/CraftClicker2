@@ -5,6 +5,26 @@ Layer = function(oArgs)
   this.level = oArgs.level;
   this.squares = new Array(Layer.rows);
 
+  if (this.level === Layer._maxLayers)
+  {
+    var solidite = Items.get("Solidite");
+    this.squares.assignEach(function()
+    {
+      return new Array(Layer.cols).assignEach(function()
+      {
+        var objSquare =
+        {
+          item: solidite,
+          hardness: solidite.hardness
+        }
+
+        return objSquare;
+      });
+    });
+
+    return;
+  }
+
   for (var row = 0; row < Layer.rows; row++)
   {
     self.squares[row] = new Array(Layer.cols);
@@ -55,6 +75,12 @@ $.extend(Layer.prototype,
   gather: function(row, col)
   {
     var objSquare = this.squares[row][col];
+    if (objSquare.hardness < 0)
+    {
+      // Solidite encountered
+      return null;
+    }
+    
     if (--objSquare.hardness === 0)
     {
       // The square has been fully broken.

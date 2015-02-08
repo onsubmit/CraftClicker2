@@ -493,17 +493,21 @@ $.extend(Game.prototype,
                       var $droppedAmount = $elClone.find(".iconAmount");
                       var currentAmount = parseInt($currentAmount.text() || 1);
                       var droppedAmount = parseInt($droppedAmount.text() || 1);
-                      if (currentAmount === 1)
+                      var newAmount = currentAmount - droppedAmount;
+                      if (newAmount === 1)
                       {
                         $currentAmount.hide();
                       }
-                      else if (currentAmount < 1)
+                      else if (newAmount === 0)
                       {
                         self.getInventoryItem(item.id).fadeOut();
+                      }
+                      else if (newAmount < 0)
+                      {
                         return;
                       }
 
-                      $currentAmount.text(currentAmount - droppedAmount);
+                      $currentAmount.text(newAmount);
                     }
 
                     var $icon = $("<div/>",
@@ -576,25 +580,41 @@ $.extend(Game.prototype,
                     if ($current.length)
                     {
                       var currentIngredient = Items.get($current.attr("data-item"));
-                      var newIngredient = Items.get($(ui.helper).attr("data-item"));
+                      var newIngredient = Items.get($icon.attr("data-item"));
+                      var $currentIngredientAmount = $current.find(".iconAmount");
+                      var currentIngredientAmount = parseInt($currentIngredientAmount.text() || 1);
+                      var $newIngredientAmount = $icon.find(".iconAmount");
+                      var newIngredientAmount = parseInt($newIngredientAmount.text() || 1);
 
                       var $parent = $(ui.helper).parent();
-                      if (!$parent.hasClass("accept"))
+                      if (currentIngredient == newIngredient)
                       {
-                        // This happens when the player drops an item from the inventory.
-                        // Swapping requires reclaiming the currently existing ingredient
-                        // back to the inventory.
-                        var $amount = $current.find(".iconAmount");
-                        var amount = parseInt($amount.text() || 1);
-
-                        var objReclaim = {};
-                        objReclaim[currentIngredient.id] = amount;
-                        self.reclaimIngredients(objReclaim);
+                        if (!$parent.hasClass("accept"))
+                        {
+                          // There is already the same item in this square. Add to it.
+                          $newIngredientAmount.text(currentIngredientAmount + newIngredientAmount);
+                        }
+                        else
+                        {
+                          // TODO: Needed at 2x2?
+                        }
                       }
-                      else if (currentIngredient != newIngredient)
-                      {
-                        // There is already a different item in this square. Swap them.
-                        $parent.empty().append($current);
+                      else
+                      {                        
+                        if (!$parent.hasClass("accept"))
+                        {
+                          // This happens when the player drops an item from the inventory.
+                          // Swapping requires reclaiming the currently existing ingredient
+                          // back to the inventory.
+                          var objReclaim = {};
+                          objReclaim[currentIngredient.id] = currentIngredientAmount;
+                          self.reclaimIngredients(objReclaim);
+                        }
+                        else
+                        {
+                          // There is already a different item in this square. Swap them.
+                          $parent.empty().append($current);
+                        }
                       }
                     }
 
