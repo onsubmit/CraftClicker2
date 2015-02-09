@@ -740,6 +740,7 @@ $.extend(Game.prototype,
         if (amountToCraft == e.data.maxAmount)
         {
           self.clearCraftingTable();
+          self.getCraftingTakeContainer().hide();
         }
         else
         {
