@@ -1,21 +1,22 @@
 <html>
   <head>
     <title>CraftClicker2 0.01 alpha</title>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
-    <script src="js/jquery-ui.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script src="js/jquery.ui.touch-punch.min.js"></script>
-    <script type="text/javascript" src="js/extensions.js"></script>
-    <script type="text/javascript" src="js/item.js"></script>
-    <script type="text/javascript" src="js/recipe.js"></script>
-    <script type="text/javascript" src="js/items.js"></script>
-    <script type="text/javascript" src="js/inventory.js"></script>
-    <script type="text/javascript" src="js/player.js"></script>
-    <script type="text/javascript" src="js/layer.js"></script>
-    <script type="text/javascript" src="js/tile.js"></script>
-    <script type="text/javascript" src="js/world.js"></script>
-    <script type="text/javascript" src="js/game.js"></script>
-    <script type="text/javascript" src="js/tests.js"></script>
-    <link type="text/css" href="css/styles.css" rel="stylesheet" />
+    <script src="js/extensions.js"></script>
+    <script src="js/item.js"></script>
+    <script src="js/recipe.js"></script>
+    <script src="js/items.js"></script>
+    <script src="js/inventory.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/layer.js"></script>
+    <script src="js/tile.js"></script>
+    <script src="js/world.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/tests.js"></script>
+    <link href="css/styles.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
     <link rel="shortcut icon" href="favicon.ico" />
   </head>
   <body>
@@ -25,7 +26,7 @@
         <div id="craftingContainer">
           <table id="craftingTable">
             <tr>
-              <td><div class="accept"></div></td>
+              <td data-pos="0,0"><div class="accept"></div></td>
             </tr>
           </table>
           <div>
@@ -36,6 +37,11 @@
             <table id="craftingOutputTable">
               <tr>
                 <td class="craftingCell"><div id="craftingOutput"></div></td>
+                <td>
+                  <div id="craftingTakeContainer">
+                    <input id="craftingTakeAmount" value="1" readonly="readonly"/>
+                  </div>
+                </td>
               </tr>
             </table>
           </div>

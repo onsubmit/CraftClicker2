@@ -26,7 +26,7 @@ $.extend(Inventory.prototype,
     // WARNING! This method does ABSOLUTELY NO bounds checking on the ingredients (on purpose).
     // WARNING! The UI should prevent the player from consuming items they don't actually have.
     var self = this;
-    arrIngredients.foreach2d(function(ingredient)
+    arrIngredients.forEach2d(function(ingredient)
     {
       if (ingredient)
       {

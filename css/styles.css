@@ -85,6 +85,27 @@ div.accept, div#craftingOutput {
   border-spacing: 0px;
 }
 
+#craftingTakeContainer {
+  display: none;
+}
+
+#craftingTakeContainer .ui-spinner-button {
+  position: relative;
+}
+
+#craftingTakeContainer .ui-corner-all, #craftingTakeContainer .ui-spinner-button {
+  border-radius: 0;
+  border-left: 0;
+}
+
+#craftingTakeAmount {
+  width: 24px;
+  height: 24px;
+  font-family: consolas, monospace;
+  font-size: 12px;
+  display: none;
+}
+
 #inventoryContainer {
   display: none;
 }

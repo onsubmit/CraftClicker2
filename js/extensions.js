@@ -67,9 +67,9 @@ if (!Array.prototype.pushUnique)
   }
 }
 
-if (!Array.prototype.foreach2d)
+if (!Array.prototype.forEach2d)
 {
-  Array.prototype.foreach2d = function(f)
+  Array.prototype.forEach2d = function(f)
   {
     for (var row = 0, rows = this.length; row < rows; row++)
     {

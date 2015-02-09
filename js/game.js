@@ -1,5 +1,3 @@
-preloadImages();
-
 function Game(oArgs)
 {
   this._minAnimationDuration = 1;
@@ -40,6 +38,10 @@ $.extend(Game.prototype,
   getCellsFromCraftingTable: function()
   {
     return $(".crafting.dropped");
+  },
+  getCellFromCraftingTable: function(row, col)
+  {
+    return $("#craftingTable td[data-pos='" + row + "," + col + "']");
   },
   getItemInOutput: function()
   {
@@ -92,6 +94,14 @@ $.extend(Game.prototype,
   getClearCraft: function()
   {
     return $("#clearCraft");
+  },
+  getCraftingTakeContainer: function()
+  {
+    return $("#craftingTakeContainer");
+  },
+  getCraftingTakeAmount: function()
+  {
+    return $("#craftingTakeAmount");
   },
   clearCraftingTable: function()
   {
@@ -521,7 +531,7 @@ $.extend(Game.prototype,
                     var $amount = $("<div/>",
                                   {
                                     id: "c" + item.id,
-                                    class: "iconAmount",
+                                    class: "iconAmount"
                                   });
 
                     if (droppedAmount !== 1)
@@ -677,10 +687,20 @@ $.extend(Game.prototype,
                       class: "iconAmount"
                     });
 
-      var amount = craftableItem.item.recipe.makes * craftableItem.amount;
+      var makes = craftableItem.item.recipe.makes;
+      var amount = makes * craftableItem.amount;
       if (amount !== 1)
       {
         $amount.text(amount);
+      }
+
+      if (craftableItem.amount > 1)
+      {
+        this.getCraftingTakeContainer().show();
+      }
+      else
+      {
+        this.getCraftingTakeContainer().hide();
       }
 
       $icon.append($amount);
@@ -688,24 +708,74 @@ $.extend(Game.prototype,
       {
         craftableItem: craftableItem,
         arrIngredients: arrIngredients,
+        maxAmount: amount
+
       }, function(e)
       {
+        var amountToCraft = parseInt($(this).text());
         var arrDrops = 
         [
           {
             item: e.data.craftableItem.item,
-            amount: e.data.craftableItem.item.recipe.makes * e.data.craftableItem.amount
+            amount: amountToCraft
           }
         ];
+
+        if (amountToCraft < e.data.maxAmount)
+        {
+          var decrement = ((e.data.maxAmount - amountToCraft) / e.data.craftableItem.item.recipe.makes);
+          e.data.arrIngredients.forEach2d(function(ingredient)
+          {
+            if (ingredient)
+            {
+              ingredient.amount -= decrement;
+            }
+          });
+        }
 
         self.player.inventory.consume(e.data.arrIngredients);
         self.player.inventory.merge(arrDrops);
         self.drawInventory(arrDrops);
-        self.clearCraftingTable();
         self.clearCraftingOutput();
+        if (amountToCraft == e.data.maxAmount)
+        {
+          self.clearCraftingTable();
+        }
+        else
+        {
+          for (var row = 0, rows = e.data.arrIngredients.length; row < rows; row++)
+          {
+            for (var col = 0, cols = e.data.arrIngredients[row].length; col < cols; col++)
+            {
+              var $ingredient = self.getCellFromCraftingTable(row, col);
+              var $ingredientAmount = $ingredient.find(".iconAmount");
+              var ingredientAmount = parseInt($ingredientAmount.text() || 1);
+              var ingredient = e.data.arrIngredients[row][col];
+              var newAmount = ingredientAmount - ingredient.amount;
+              $ingredient.find(".iconAmount").text(newAmount);
+            }
+          }
+
+          self.checkRecipe();
+        }
       });
                   
       this.getCraftingOutput().append($icon);
+
+      if (amount > makes)
+      {
+        this.getCraftingTakeAmount()
+          .spinner("option", "min", makes)
+          .spinner("option", "max", amount)
+          .spinner("option", "step", makes)
+          .val(amount);
+
+        this.getCraftingTakeContainer().show();
+      }
+      else
+      {
+        this.getCraftingTakeAmount().hide();
+      }
     }
   },
   checkIngredients: function(arrIngredients)
@@ -750,7 +820,7 @@ $.extend(Game.prototype,
     {
       var objReclaim = {};
       var arrIngredients = self.getIngredientsFromCraftingTable();
-      arrIngredients.foreach2d(function(ingredient)
+      arrIngredients.forEach2d(function(ingredient)
       {
         if (!ingredient) return;
         if (!objReclaim[ingredient.item.id])
@@ -797,6 +867,30 @@ $.extend(Game.prototype,
         $currentAmount.show();
       }
     }
+  },
+  setupTakeSpinner: function()
+  {
+    var self = this;
+    this.getCraftingTakeAmount().spinner(
+    {
+      min: 1,
+      max: 1,
+      step: 1,
+      start: function(event, ui)
+      {
+        var $el = $(event.target);
+        $el.attr("data-oldval", $el.val());
+
+      },
+      stop: function(event, ui)
+      {
+        var $el = $(event.target);
+        var oldVal = $el.attr("data-oldval");
+        var newVal = $el.val();
+        if (oldVal === newVal) return;
+        self.getCraftingOutput().find(".iconAmount").text(newVal);
+      }
+    });
   }
 });
 
@@ -813,6 +907,7 @@ $(document).ready(function()
   game.setupFilters();
   game.setupDropTargets();
   game.setupClearCrafting();
+  game.setupTakeSpinner();
 });
 
 $(document).keypress(function(e)
@@ -829,7 +924,7 @@ $(document).keypress(function(e)
   }
 });
 
-function preloadImages()
+(function preloadImages()
 {
   var images =
   [
@@ -842,7 +937,10 @@ function preloadImages()
     "shadows/Top",
     "shadows/TopLeft",
     "shadows/TopLeftCorner",
-    "shadows/CraftingTable"
+    "shadows/CraftingTable",
+    "ArrowRight",
+    "Player",
+    "World"
   ];
 
   Items.forEach(function(item) { images.push(item.name); });
@@ -850,4 +948,4 @@ function preloadImages()
   {
     setTimeout(function() { (new Image()).src = "images/" + itemName + ".png"; }, 1000);
   });
-}
+})();

@@ -1,7 +1,5 @@
 Layer = function(oArgs)
 {
-  var self = this;
-
   this.level = oArgs.level;
   this.squares = new Array(Layer.rows);
 
@@ -27,7 +25,7 @@ Layer = function(oArgs)
 
   for (var row = 0; row < Layer.rows; row++)
   {
-    self.squares[row] = new Array(Layer.cols);
+    this.squares[row] = new Array(Layer.cols);
     for (var col = 0; col < Layer.cols; col++)
     {
       var clusterSize = 1;
@@ -37,14 +35,14 @@ Layer = function(oArgs)
         var square = Layer._probabilities[i];
         var minLevel = square.minLevel === 0 ? 0 : square.minLevel || 1;
         var maxLevel = square.maxLevel === 0 ? 0 : square.maxLevel || Layer._maxLayers;
-        if (self.level < minLevel || self.level > maxLevel)
+        if (this.level < minLevel || this.level > maxLevel)
         {
           continue;
         }
 
         // Choose the current item if its generation function returns true.
         // Otherwise choose the fallback item if it exists.
-        var fSquareChosen = square.probs && r(square.probs(self.level, row, col));
+        var fSquareChosen = square.probs && r(square.probs(this.level, row, col));
         if (!fSquareChosen && square.fallback)
         {
           square = square.fallback;
@@ -54,13 +52,13 @@ Layer = function(oArgs)
         if (fSquareChosen)
         {
           objResource = square.item;
-          clusterSize = square.getClusterSize ? square.getClusterSize(self.level) : 1
+          clusterSize = square.getClusterSize ? square.getClusterSize(this.level) : 1
           break;
         }
       }
 
       var item = objResource || Items.get("Stone");
-      self.squares[row][col] = 
+      this.squares[row][col] = 
       {
         item: item,
         hardness: item.hardness,

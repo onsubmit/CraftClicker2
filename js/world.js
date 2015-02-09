@@ -1,6 +1,5 @@
 World = function(oArgs)
 {
-  var self = this;
   this.size = { rows: oArgs.rows, cols: oArgs.cols };
   this.tiles = (new Array(oArgs.rows)).assignEach(function() { return new Array(oArgs.cols); });
 }
