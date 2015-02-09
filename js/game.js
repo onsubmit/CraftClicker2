@@ -41,7 +41,7 @@ $.extend(Game.prototype,
   },
   getCellFromCraftingTable: function(row, col)
   {
-    return $("#craftingTable td[data-pos='" + row + "," + col + "']");
+    return $("#craftingTable td[data-cpos='" + row + "," + col + "']");
   },
   getItemInOutput: function()
   {
