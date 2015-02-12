@@ -1,46 +1,48 @@
-function Inventory(oArgs)
+function Inventory(args)
 {
-  this.items = {};
-}
+  args = args || {};
+  args.clone = args.clone || {};
+  this.items =  args.clone.items || {};
 
-$.extend(Inventory.prototype,
-{
-  merge: function(arrDrops)
+  $.extend(Inventory.prototype,
   {
-    var self = this;
-    arrDrops.forEach(function(drop)
+    merge: function(arrDrops)
     {
-      var amount = drop.amount || 1;
-      if (self.items[drop.item.id])
+      var self = this;
+      arrDrops.forEach(function(drop)
       {
-        self.items[drop.item.id] += amount;
-      }
-      else
-      {
-        self.items[drop.item.id] = amount;
-      }
-    });
-  },
-  consume: function(arrIngredients)
-  {
-    // WARNING! This method does ABSOLUTELY NO bounds checking on the ingredients (on purpose).
-    // WARNING! The UI should prevent the player from consuming items they don't actually have.
-    var self = this;
-    arrIngredients.forEach2d(function(ingredient)
+        var amount = drop.amount || 1;
+        if (self.items[drop.item.id])
+        {
+          self.items[drop.item.id] += amount;
+        }
+        else
+        {
+          self.items[drop.item.id] = amount;
+        }
+      });
+    },
+    consume: function(arrIngredients)
     {
-      if (ingredient)
+      // WARNING! This method does ABSOLUTELY NO bounds checking on the ingredients (on purpose).
+      // WARNING! The UI should prevent the player from consuming items they don't actually have.
+      var self = this;
+      arrIngredients.forEach2d(function(ingredient)
       {
-        var amount = ingredient.amount || 1;
-        self.items[ingredient.item.id] -= amount
-      }
-    });
-  },
-  toString: function()
-  {
-    for (var id in this.items)
+        if (ingredient)
+        {
+          var amount = ingredient.amount || 1;
+          self.items[ingredient.item.id] -= amount
+        }
+      });
+    },
+    toString: function()
     {
-      var item = Items.get(id);
-      console.log(item.name + ": " + this.items[id]);
+      for (var id in this.items)
+      {
+        var item = Items.get(id);
+        console.log(item.name + ": " + this.items[id]);
+      }
     }
-  }
-});
+  });
+}

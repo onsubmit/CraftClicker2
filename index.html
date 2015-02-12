@@ -14,6 +14,7 @@
     <script src="js/tile.js"></script>
     <script src="js/world.js"></script>
     <script src="js/game.js"></script>
+    <script src="js/selectors.js"></script>
     <script src="js/tests.js"></script>
     <link href="css/styles.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
@@ -56,12 +57,13 @@
       <div id="items" class="window">
         <input id="itemFilter" class="filter" type="textbox" placeholder="Filter" />
         <div id="itemList"></div>
+        <button id="options" class="big">Options</button>
       </div>
     </div>
     <div id="middleColumn">
       <div id="worldContainer">
         <table id="world"></table>
-        <div id="buttons">
+        <div id="worldButtons">
           <button id="zoomIn" class="big">Zoom to tile</button>
         </div>
       </div>
@@ -69,7 +71,21 @@
         <button id="gather" class="big">Gather</button><button id="zoomOut" class="big">Return to world</button>
       </div>
     </div>
-    <!--<button onclick="game.save()">Save</button>
-    <button onclick="game.load()">Load</button>-->
+    <div id="exportDialog" title="Copy save data to clipboard">
+      <textarea id="exportData" readonly="readonly" rows="10" cols="30"></textarea>
+    </div>
+    <div id="importDialog" title="Paste save data from clipboard">
+      <textarea id="importData" rows="10" cols="30"></textarea>
+    </div>
+    <div id="optionsDialog" title="Options">
+      <div id="gameButtons">
+        <button id="save" class="big">Save</button>
+        <button id="load"class="big">Load</button>
+        <span><label for="autosave"><input id="autosave" type="checkbox" checked="checked" />Autosave</label></span>
+        <button id="export"class="big">Export</button>
+        <button id="import"class="big">Import</button>
+        <button id="reset" class="big">Reset</button>
+      </div>
+    </div>
   </body>
 </html>

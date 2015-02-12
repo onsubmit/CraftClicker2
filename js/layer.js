@@ -1,99 +1,114 @@
-Layer = function(oArgs)
+Layer = function(args)
 {
-  this.level = oArgs.level;
-  this.squares = new Array(Layer.rows);
+  var self = this;
+  args = args || {};
+  args.clone = args.clone || {};
+  this.level = typeof args.clone.level !== 'undefined' ? args.clone.level : args.level;
 
-  if (this.level === Layer._maxLayers)
+  var generateLayer = function ()
   {
-    var solidite = Items.get("Solidite");
-    this.squares.assignEach(function()
+    if (self.level === Layer._maxLayers)
     {
-      return new Array(Layer.cols).assignEach(function()
+      var solidite = Items.get("Solidite");
+      self.squares.assignEach(function()
       {
-        var objSquare =
+        return new Array(Layer.cols).assignEach(function()
         {
-          item: solidite,
-          hardness: solidite.hardness
+          var objSquare =
+          {
+            item: solidite,
+            hardness: solidite.hardness
+          }
+
+          return objSquare;
+        });
+      });
+
+      return;
+    }
+
+    for (var row = 0; row < Layer.rows; row++)
+    {
+      self.squares[row] = new Array(Layer.cols);
+      for (var col = 0; col < Layer.cols; col++)
+      {
+        var clusterSize = 1;
+        var objResource = null;
+        for (var i = 0, length = Layer._probabilities.length; i < length; i++)
+        {
+          var square = Layer._probabilities[i];
+          var minLevel = square.minLevel === 0 ? 0 : square.minLevel || 1;
+          var maxLevel = square.maxLevel === 0 ? 0 : square.maxLevel || Layer._maxLayers;
+          if (self.level < minLevel || self.level > maxLevel)
+          {
+            continue;
+          }
+
+          // Choose the current item if its generation function returns true.
+          // Otherwise choose the fallback item if it exists.
+          var fSquareChosen = square.probs && r(square.probs(self.level, row, col));
+          if (!fSquareChosen && square.fallback)
+          {
+            square = square.fallback;
+            fSquareChosen = true;
+          }
+
+          if (fSquareChosen)
+          {
+            objResource = square.item;
+            clusterSize = square.getClusterSize ? square.getClusterSize(self.level) : 1
+            break;
+          }
         }
 
-        return objSquare;
-      });
-    });
-
-    return;
+        var item = objResource || Items.get("Stone");
+        self.squares[row][col] = 
+        {
+          item: item,
+          hardness: item.hardness,
+          clusterSize: clusterSize
+        };
+      }
+    }
   }
 
-  for (var row = 0; row < Layer.rows; row++)
+  if (args.clone.squares)
   {
-    this.squares[row] = new Array(Layer.cols);
-    for (var col = 0; col < Layer.cols; col++)
+    this.squares = args.clone.squares;
+  }
+  else
+  {
+    this.squares = new Array(Layer.rows);
+    generateLayer();
+  }
+
+  $.extend(Layer.prototype,
+  {
+    gather: function(row, col)
     {
-      var clusterSize = 1;
-      var objResource = null;
-      for (var i = 0, length = Layer._probabilities.length; i < length; i++)
+      var objSquare = this.squares[row][col];
+      if (objSquare.hardness < 0)
       {
-        var square = Layer._probabilities[i];
-        var minLevel = square.minLevel === 0 ? 0 : square.minLevel || 1;
-        var maxLevel = square.maxLevel === 0 ? 0 : square.maxLevel || Layer._maxLayers;
-        if (this.level < minLevel || this.level > maxLevel)
-        {
-          continue;
-        }
-
-        // Choose the current item if its generation function returns true.
-        // Otherwise choose the fallback item if it exists.
-        var fSquareChosen = square.probs && r(square.probs(this.level, row, col));
-        if (!fSquareChosen && square.fallback)
-        {
-          square = square.fallback;
-          fSquareChosen = true;
-        }
-
-        if (fSquareChosen)
-        {
-          objResource = square.item;
-          clusterSize = square.getClusterSize ? square.getClusterSize(this.level) : 1
-          break;
-        }
+        // Solidite encountered
+        return null;
+      }
+      
+      if (--objSquare.hardness === 0)
+      {
+        // The square has been fully broken.
+        objSquare.clusterSize -= 1;
+        var arrDrops = objSquare.item.gather ? objSquare.item.gather() : [{ item: objSquare.item }];
+        return arrDrops;
       }
 
-      var item = objResource || Items.get("Stone");
-      this.squares[row][col] = 
-      {
-        item: item,
-        hardness: item.hardness,
-        clusterSize: clusterSize
-      };
-    }
-  }
-};
-
-$.extend(Layer.prototype,
-{
-  gather: function(row, col)
-  {
-    var objSquare = this.squares[row][col];
-    if (objSquare.hardness < 0)
-    {
-      // Solidite encountered
       return null;
-    }
-    
-    if (--objSquare.hardness === 0)
+    },
+    toString: function()
     {
-      // The square has been fully broken.
-      objSquare.clusterSize -= 1;
-      var arrDrops = objSquare.item.gather ? objSquare.item.gather() : [{ item: objSquare.item }];
-      return arrDrops;
+      return "";
     }
-
-    return null;
-  },
-  toString: function()
-  {
-    return "";
-  }
-});
+  });
+};
 
 $.extend(Layer,
 {

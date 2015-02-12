@@ -107,6 +107,7 @@ div.accept, div#craftingOutput {
 
 #inventoryContainer {
   display: none;
+  height: calc(100% - 65px);
 }
 
 #inventoryList {
@@ -192,7 +193,7 @@ div.accept, div#craftingOutput {
   box-shadow: inset 0 0 8px 0px #000;
 }
 
-#buttons {
+#worldButtons {
   margin-left: 34px;
 }
 
@@ -201,7 +202,6 @@ div.accept, div#craftingOutput {
 }
 
 table.tile {
-  display: none;
   width: 128px;
   height: 128px;
   empty-cells: show;
@@ -296,7 +296,22 @@ table.tile td div.shadowTop {
 
 #itemList {
   overflow-y: auto;
-  height: calc(100% - 20px);
+  height: calc(100% - 78px);
+}
+
+#options {
+  float: right;
+  margin: 0;
+}
+
+#gameButtons {
+  text-align: center;
+}
+
+#gameButtons button, #gameButtons span {
+  display: inline-block;
+  width: 100px;
+  margin: 8px 8px 8px 0;
 }
 
 img.itemListItem {
@@ -346,4 +361,29 @@ button.big {
 
 input[type=checkbox] {
   vertical-align: -2px;
+}
+
+.ui-dialog {
+  box-shadow: 0px 0px 1p6x #666;
+}
+
+.ui-dialog textarea {
+  width: 100%;
+  height: 100%;
+}
+
+/* Overriden styles found in jquery-ui.css */
+.ui-dialog.override {
+  box-shadow: 0px 0px 1p6x #666;
+}
+
+.ui-widget-overlay.override {
+    background: repeat-x scroll 50% 50% #000;
+    opacity: 0.5;
+    filter: Alpha(Opacity=50);
+}
+
+.ui-widget textarea.override {
+  font-family: consolas, monospace;
+  font-size: 0.7em;
 }

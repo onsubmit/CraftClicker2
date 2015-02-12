@@ -76,7 +76,7 @@ if (!Array.prototype.forEach2d)
       for (var col = 0, cols = this[row].length; col < cols; col++)
       {
         var item = this[row][col];
-        var retVal = f(item);
+        var retVal = f(item, row, col);
         if (typeof retVal !== "undefined")
         {
           return retVal;
@@ -95,7 +95,7 @@ if (!Array.prototype.some2d)
       for (var col = 0, cols = this[row].length; col < cols; col++)
       {
         var item = this[row][col];
-        if (f(item))
+        if (f(item, row, col))
         {
           return true;
         }
@@ -115,7 +115,7 @@ if (!Array.prototype.every2d)
       for (var col = 0, cols = this[row].length; col < cols; col++)
       {
         var item = this[row][col];
-        if (!f(item))
+        if (!f(item, row, col))
         {
           return false;
         }

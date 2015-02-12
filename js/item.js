@@ -1,13 +1,13 @@
-Item = function(oArgs)
+Item = function(args)
 {
-  this.name = oArgs.name;
-  this.id = oArgs.id;
-  this.hardness = oArgs.hardness || 1;
-  this.hidden = !!oArgs.hidden;
-  this.recipe = oArgs.recipe;
-  this.gather = oArgs.gather;
-  this.image = oArgs.image;
-  this.pluralSuffix = oArgs.pluralSuffix;
+  this.name = args.name;
+  this.id = args.id;
+  this.hardness = args.hardness || 1;
+  this.hidden = !!args.hidden;
+  this.recipe = args.recipe;
+  this.gather = args.gather;
+  this.image = args.image;
+  this.pluralSuffix = args.pluralSuffix;
 };
 
 $.extend(Item.prototype,
