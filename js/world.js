@@ -10,7 +10,7 @@ World = function(args)
   {
     args.clone.tiles.forEach2d(function(tile, row, col)
     {
-       self.tiles[row][col] = new Tile({ clone: tile });
+       self.tiles[row][col] = tile ? new Tile({ clone: tile }) : null;
     });
   }
 
@@ -34,8 +34,8 @@ World = function(args)
     },
     drawTile: function(row, col)
     {
-      var isNew = !this.tiles[row][col] || !this.getTiles().length;
       var objTile = this.getTile(row, col);
+      var isNew = !this.tiles[row][col] || !this.getTiles().length || !objTile.getTable().length;
 
       var $table = null;
       if (isNew)

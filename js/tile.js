@@ -286,7 +286,7 @@ Tile = function(args)
       }
 
       $table.append(rowsToAdd);
-      this.activateSquare(0, 0, $table);
+      this.activateSquare(this.activeSquare.row, this.activeSquare.col, $table);
       return $table;
     },
     fixShadows: function()
@@ -355,9 +355,9 @@ Tile = function(args)
               }
             }
 
-              var $div = this.getSquare(row, col, $table).find(".layer");
-              $div.removeAttr('class');
-              $div.addClass('layer ' + strShadowClass);
+            var $div = this.getSquare(row, col, $table).find(".layer");
+            $div.removeAttr('class');
+            $div.addClass('layer ' + strShadowClass);
           }
         }
       }

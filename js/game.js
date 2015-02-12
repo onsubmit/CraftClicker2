@@ -107,19 +107,26 @@ function Game(args)
       
       if (zoomInstantly)
       {
-        this.world.getContainer().hide();
+        game.world.getContainer().hide();
         game.world.getTiles().show();
         game.world.drawTile(row, col).show();
-        game.world.getTile(game.player.vector.row, game.player.vector.col).fixShadows();
+        game.world.getTile(row, col).fixShadows();
         game.world.getTileContainer().show();
       }
       else
       {
+        game.getGather().disable();
+        game.getZoomOut().disable();
         this.world.getContainer().fadeOut("fast", function()
         {
           game.world.getTiles().hide();
           game.world.drawTile(row, col).show();
-          game.world.getTileContainer().fadeIn("fast");
+          game.world.getTile(row, col).fixShadows();
+          game.world.getTileContainer().fadeIn("fast", function()
+          {
+            game.getGather().enable();
+            game.getZoomOut().enable();
+          });
         });
       }
 
@@ -127,8 +134,15 @@ function Game(args)
     },
     zoomOut: function()
     {
+      game.getZoomIn().disable();
       this.currentView = View.World;
-      this.world.getTileContainer().fadeOut("fast", function() { game.world.getContainer().fadeIn("fast"); });
+      this.world.getTileContainer().fadeOut("fast", function()
+        {
+          game.world.getContainer().fadeIn("fast", function()
+          {
+            game.getZoomIn().enable();
+          });
+        });
       return this;
     },
     createPlayer: function(row, col, complete)
@@ -971,7 +985,10 @@ $(document).keypress(function(e)
 
 $(window).on('beforeunload', function()
 {
-  game.save();
+  if (game.autosave)
+  {
+    game.save();
+  }
 });
 
 (function preloadImages()
