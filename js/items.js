@@ -70,7 +70,11 @@ Items.add(
   hardness: 4,
   gather: function()
   {
-    return [{ item: Items.get("Wood") }].pushIf(r(0.25), { item: Items.get("Sapling") });
+    var drops = [ { item: Items.get("Wood") } ]
+                .pushIf(r(0.25), { item: Items.get("Sapling") })
+                .pushIf(r(0.1), { item: Items.get("Stick") });
+
+    return drops;
   }
 });
 

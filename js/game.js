@@ -32,7 +32,7 @@ function Game(args)
       {
         localStorage.removeItem('CraftClicker2');
         $(window).off('beforeunload');
-        window.location.reload()
+        window.location.reload();
       }
     },
     export: function()
@@ -676,7 +676,26 @@ function Game(args)
 
       }, function(e)
       {
-        var amountToCraft = parseInt($(this).text());
+        var amountToCraft = parseInt($(this).find(".iconAmount").text() || 1);
+        var multiplier = amountToCraft / e.data.craftableItem.item.recipe.makes;
+        e.data.arrIngredients.forEach2d(function(ingredient, row, col)
+        {
+          if (ingredient)
+          {
+            var $ingredient = game.getCellFromCraftingTable(row, col);
+
+            ingredient.amount -= multiplier * e.data.craftableItem.item.recipe.ingredients[row][col].amount;
+            if (ingredient.amount === 0)
+            {
+              $ingredient.find(".crafting.dropped").remove();
+            }
+            else
+            {
+              $ingredient.find(".iconAmount").text(ingredient.amount);
+            }
+          }
+        });
+
         var arrDrops = 
         [
           {
@@ -685,45 +704,12 @@ function Game(args)
           }
         ];
 
-        if (amountToCraft < e.data.maxAmount)
-        {
-          var decrement = ((e.data.maxAmount - amountToCraft) / e.data.craftableItem.item.recipe.makes);
-          e.data.arrIngredients.forEach2d(function(ingredient)
-          {
-            if (ingredient)
-            {
-              ingredient.amount -= decrement;
-            }
-          });
-        }
-
         game.player.inventory.merge(arrDrops);
         game.drawInventory(arrDrops);
         game.clearCraftingOutput();
-        if (amountToCraft == e.data.maxAmount)
-        {
-          game.clearCraftingTable();
-          game.getCraftingTakeContainer().hide();
-        }
-        else
-        {
-          for (var row = 0, rows = e.data.arrIngredients.length; row < rows; row++)
-          {
-            for (var col = 0, cols = e.data.arrIngredients[row].length; col < cols; col++)
-            {
-              var $ingredient = game.getCellFromCraftingTable(row, col);
-              var $ingredientAmount = $ingredient.find(".iconAmount");
-              var ingredientAmount = parseInt($ingredientAmount.text() || 1);
-              var ingredient = e.data.arrIngredients[row][col];
-              var newAmount = ingredientAmount - ingredient.amount;
-              $ingredient.find(".iconAmount").text(newAmount);
-            }
-          }
-
-          game.checkRecipe();
-        }
+        game.checkRecipe();
       });
-                  
+
       this.getCraftingOutput().append($icon);
 
       if (amount > makes)

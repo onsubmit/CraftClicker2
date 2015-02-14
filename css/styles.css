@@ -114,7 +114,8 @@ div.accept, div#craftingOutput {
   padding: 0;
   margin: 0;
   list-style-type: none;
-  //overflow-y: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   height: calc(100% - 20px);
 }
 
@@ -148,6 +149,7 @@ div.accept, div#craftingOutput {
   min-height: 24px;
   line-height: 24px;
   margin-left: 30px;
+  white-space: nowrap;
 }
 
 #inventoryMoveStacksLabel {
