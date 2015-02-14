@@ -38,9 +38,18 @@ Recipe = function(args)
         // TODO: Support crafting smaller recipes in larger crafting tables.
         //       Example: A 2x2 recipe should be craftable in 4 different ways
         //       This should be accomplishable by "trimming" arrIngredients down to its non empty cells
-        for (var row = 0, rows = arrIngredients.length; row < rows; row++)
+
+        var rows = arrIngredients.length;
+        var cols = arrIngredients[0].length;
+        if (rows < this.rows || cols < this.cols)
         {
-          for (var col = 0, cols = arrIngredients[row].length; col < cols; col++)
+          // Recipe is too small
+          return 0;
+        }
+
+        for (var row = 0; row < rows; row++)
+        {
+          for (var col = 0; col < cols; col++)
           {
             var ingredient = arrIngredients[row][col];
             if (ingredient)

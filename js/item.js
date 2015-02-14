@@ -5,6 +5,7 @@ Item = function(args)
   args.clone = args.clone || {};
   this.name = args.clone.name || args.name;
   this.id = args.clone.id || args.id;
+  this.meta = args.clone.meta || args.meta;
   this.hardness = args.clone.hardness || args.hardness || 1;
   this.hidden = typeof args.clone.hidden !== 'undefined' ? !!args.clone.hidden : !!args.hidden;
   this.recipe = args.clone.recipe || args.recipe;

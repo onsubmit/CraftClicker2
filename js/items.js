@@ -12,7 +12,6 @@ $.extend(Items,
       throw new Error("Item with name: " + oArgs.name + " already exists.");
     }
     
-    oArgs.id = Items._items.length;
     var oItem = Items._nameMap[oArgs.name] = new Item(oArgs);
     Items._items.push(oItem);
   },
@@ -47,12 +46,25 @@ $.extend(Items,
 
 Items.add(
 {
+  id: 0,
   name: "Grass",
-  hardness: 1
+  hardness: 1,
+  gather: function()
+  {
+    return [{ item: Items.get("Grass") }].pushIf(r(0.25), { item: Items.get("Small Rock") });
+  }
 });
 
 Items.add(
 {
+  id: 1,
+  name: "Small Rock",
+  pluralSuffix: "s"
+});
+
+Items.add(
+{
+  id: 2,
   name: "Tree",
   hidden: true,
   hardness: 4,
@@ -64,14 +76,20 @@ Items.add(
 
 Items.add(
 {
+  id: 3,
   name: "Sapling",
   pluralSuffix: "s"
 });
 
-Items.add({ name: "Wood" });
+Items.add(
+{
+  id: 4,
+  name: "Wood"
+});
 
 Items.add(
 {
+  id: 5,
   name: "Lumber",
   recipe: new Recipe(
   {
@@ -90,6 +108,7 @@ Items.add(
 
 Items.add(
 {
+  id: 6,
   name: "Stick",
   pluralSuffix: "s",
   recipe: new Recipe(
@@ -114,6 +133,7 @@ Items.add(
 
 Items.add(
 {
+  id: 7,
   name: "Wood Plank",
   pluralSuffix: "s",
   recipe: new Recipe(
@@ -147,6 +167,7 @@ Items.add(
 
 Items.add(
 {
+  id: 8,
   name: "Workbench",
   pluralSuffix: "es",
   recipe: new Recipe(
@@ -165,24 +186,30 @@ Items.add(
 
 Items.add(
 {
+  id: 9,
   name: "Stone",
   hardness: 4
 });
 
 Items.add(
 {
+  id: 10,
+  meta: 1,
   name: "Coal Ore",
   hardness: 6
 });
 
 Items.add(
 {
+  id: 10,
+  meta: 2,
   name: "Iron Ore",
   hardness: 8
 });
 
 Items.add(
 {
+  id: 11,
   name: "Solidite",
   hardness: -1
 });
