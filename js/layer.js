@@ -74,7 +74,20 @@ Layer = function(args)
 
   if (args.clone.squares)
   {
-    this.squares = args.clone.squares;
+    var self = this;
+    this.squares = (new Array(Layer.rows)).assignEach(function() { return new Array(Layer.cols); });
+    args.clone.squares.forEach2d(function(square, row, col)
+    {
+      if (square)
+      {
+        self.squares[row][col] = 
+        {
+          item: new Item({ clone: square.item }),
+          hardness: square.item.hardness,
+          clusterSize: square.clusterSize
+        };
+      }
+    });
   }
   else
   {

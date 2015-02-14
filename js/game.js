@@ -514,9 +514,8 @@ function Game(args)
             scroll: false,
             start: function(event, ui)
             {
-              $(event.target).remove();
+              $(event.target).hide();
               $(ui.helper).removeClass("dropped");
-              game.checkRecipe();
 
               // Prevent the player from dragging an ingredient in the crafting table
               // to in-between two (or four) squares, which would duplicate the ingredient.
@@ -525,6 +524,7 @@ function Game(args)
             },
             stop: function(event, ui)
             {
+              $(event.target).remove();
               $(".accept").droppable("option", "tolerance", "touch");
               var $elClone = $(ui.helper);
               if (!$elClone.hasClass("dropped"))
@@ -634,108 +634,111 @@ function Game(args)
       this.clearCraftingOutput();
       var arrIngredients = game.getIngredientsFromCraftingTable();
       var craftableItem = game.checkIngredients(arrIngredients);
-      if (craftableItem)
+      if (!craftableItem)
       {
-        var $icon = $("<div/>",
+        this.getCraftingTakeContainer().hide();
+        return;
+      }
+
+      var $icon = $("<div/>",
+                  {
+                    class: "crafted iconImage",
+                    style: "background: url('" + craftableItem.item.image + "')"
+                  });
+
+      var $amount = $("<div/>",
                     {
-                      class: "crafted iconImage",
-                      style: "background: url('" + craftableItem.item.image + "')"
+                      class: "iconAmount"
                     });
 
-        var $amount = $("<div/>",
-                      {
-                        class: "iconAmount"
-                      });
+      var makes = craftableItem.item.recipe.makes;
+      var amount = makes * craftableItem.amount;
+      if (amount !== 1)
+      {
+        $amount.text(amount);
+      }
 
-        var makes = craftableItem.item.recipe.makes;
-        var amount = makes * craftableItem.amount;
-        if (amount !== 1)
+      if (craftableItem.amount > 1)
+      {
+        this.getCraftingTakeContainer().show();
+      }
+      else
+      {
+        this.getCraftingTakeContainer().hide();
+      }
+
+      $icon.append($amount);
+      $icon.mousedown(
+      {
+        craftableItem: craftableItem,
+        arrIngredients: arrIngredients,
+        maxAmount: amount
+
+      }, function(e)
+      {
+        var amountToCraft = parseInt($(this).text());
+        var arrDrops = 
+        [
+          {
+            item: e.data.craftableItem.item,
+            amount: amountToCraft
+          }
+        ];
+
+        if (amountToCraft < e.data.maxAmount)
         {
-          $amount.text(amount);
+          var decrement = ((e.data.maxAmount - amountToCraft) / e.data.craftableItem.item.recipe.makes);
+          e.data.arrIngredients.forEach2d(function(ingredient)
+          {
+            if (ingredient)
+            {
+              ingredient.amount -= decrement;
+            }
+          });
         }
 
-        if (craftableItem.amount > 1)
+        game.player.inventory.merge(arrDrops);
+        game.drawInventory(arrDrops);
+        game.clearCraftingOutput();
+        if (amountToCraft == e.data.maxAmount)
         {
-          this.getCraftingTakeContainer().show();
+          game.clearCraftingTable();
+          game.getCraftingTakeContainer().hide();
         }
         else
         {
-          this.getCraftingTakeContainer().hide();
-        }
-
-        $icon.append($amount);
-        $icon.mousedown(
-        {
-          craftableItem: craftableItem,
-          arrIngredients: arrIngredients,
-          maxAmount: amount
-
-        }, function(e)
-        {
-          var amountToCraft = parseInt($(this).text());
-          var arrDrops = 
-          [
+          for (var row = 0, rows = e.data.arrIngredients.length; row < rows; row++)
+          {
+            for (var col = 0, cols = e.data.arrIngredients[row].length; col < cols; col++)
             {
-              item: e.data.craftableItem.item,
-              amount: amountToCraft
+              var $ingredient = game.getCellFromCraftingTable(row, col);
+              var $ingredientAmount = $ingredient.find(".iconAmount");
+              var ingredientAmount = parseInt($ingredientAmount.text() || 1);
+              var ingredient = e.data.arrIngredients[row][col];
+              var newAmount = ingredientAmount - ingredient.amount;
+              $ingredient.find(".iconAmount").text(newAmount);
             }
-          ];
-
-          if (amountToCraft < e.data.maxAmount)
-          {
-            var decrement = ((e.data.maxAmount - amountToCraft) / e.data.craftableItem.item.recipe.makes);
-            e.data.arrIngredients.forEach2d(function(ingredient)
-            {
-              if (ingredient)
-              {
-                ingredient.amount -= decrement;
-              }
-            });
           }
 
-          game.player.inventory.merge(arrDrops);
-          game.drawInventory(arrDrops);
-          game.clearCraftingOutput();
-          if (amountToCraft == e.data.maxAmount)
-          {
-            game.clearCraftingTable();
-            game.getCraftingTakeContainer().hide();
-          }
-          else
-          {
-            for (var row = 0, rows = e.data.arrIngredients.length; row < rows; row++)
-            {
-              for (var col = 0, cols = e.data.arrIngredients[row].length; col < cols; col++)
-              {
-                var $ingredient = game.getCellFromCraftingTable(row, col);
-                var $ingredientAmount = $ingredient.find(".iconAmount");
-                var ingredientAmount = parseInt($ingredientAmount.text() || 1);
-                var ingredient = e.data.arrIngredients[row][col];
-                var newAmount = ingredientAmount - ingredient.amount;
-                $ingredient.find(".iconAmount").text(newAmount);
-              }
-            }
-
-            game.checkRecipe();
-          }
-        });
-                    
-        this.getCraftingOutput().append($icon);
-
-        if (amount > makes)
-        {
-          this.getCraftingTakeAmount()
-            .spinner("option", "min", makes)
-            .spinner("option", "max", amount)
-            .spinner("option", "step", makes)
-            .val(amount);
-
-          this.getCraftingTakeContainer().show();
+          game.checkRecipe();
         }
-        else
-        {
-          this.getCraftingTakeAmount().hide();
-        }
+      });
+                  
+      this.getCraftingOutput().append($icon);
+
+      if (amount > makes)
+      {
+        this.getCraftingTakeAmount()
+          .spinner("option", "min", makes)
+          .spinner("option", "max", amount)
+          .spinner("option", "step", makes)
+          .val(amount);
+
+        this.getCraftingTakeContainer().show();
+      }
+      else
+      {
+        this.getCraftingTakeAmount().hide();
       }
     },
     checkIngredients: function(arrIngredients)
