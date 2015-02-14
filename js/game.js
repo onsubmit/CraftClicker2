@@ -293,8 +293,12 @@ function Game(args)
         var $item = this.getInventoryItem(id);
         var item = Items.get(id);
         var amount = this.player.inventory.items[id];
-        this.drawInventoryItem($list, $item, item, amount);
-        count++;
+
+        if (amount > 0)
+        {
+          this.drawInventoryItem($list, $item, item, amount);
+          count++;
+        }
       };
 
       if (count)
@@ -773,25 +777,29 @@ function Game(args)
     {
       this.getClearCraft().click(function()
       {
-        var objReclaim = {};
-        var arrIngredients = game.getIngredientsFromCraftingTable();
-        arrIngredients.forEach2d(function(ingredient)
-        {
-          if (!ingredient) return;
-          if (!objReclaim[ingredient.item.id])
-          {
-            objReclaim[ingredient.item.id] = ingredient.amount;
-          }
-          else
-          {
-            objReclaim[ingredient.item.id] += ingredient.amount;
-          }
-        });
-
-        game.reclaimIngredients(objReclaim);
-        game.getCellsFromCraftingTable().fadeOutAndRemove();
-        game.getItemInOutput().fadeOutAndRemove();
+        game.reclaimCraftingArea();
       });
+    },
+    reclaimCraftingArea: function()
+    {
+      var objReclaim = {};
+      var arrIngredients = this.getIngredientsFromCraftingTable();
+      arrIngredients.forEach2d(function(ingredient)
+      {
+        if (!ingredient) return;
+        if (!objReclaim[ingredient.item.id])
+        {
+          objReclaim[ingredient.item.id] = ingredient.amount;
+        }
+        else
+        {
+          objReclaim[ingredient.item.id] += ingredient.amount;
+        }
+      });
+
+      this.reclaimIngredients(objReclaim);
+      this.getCellsFromCraftingTable().fadeOutAndRemove();
+      this.getItemInOutput().fadeOutAndRemove();
     },
     reclaimIngredients: function(objReclaim)
     {
@@ -803,7 +811,7 @@ function Game(args)
         var newAmount = currentAmount + objReclaim[id];
         $currentAmount.text(newAmount);
         this.player.inventory.mergeById(id, newAmount);
-        
+
         if (newAmount === 1)
         {
           // Don't show a badge when only one exists
@@ -988,6 +996,7 @@ $(document).keypress(function(e)
 
 $(window).on('beforeunload', function()
 {
+  game.reclaimCraftingArea();
   if (game.autosave)
   {
     game.save();
