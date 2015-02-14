@@ -547,7 +547,7 @@ function Game(args)
           $icon.addClass("dropped");
           $(ui.helper).addClass("dropped");
 
-          var $current = $(event.target).find(".iconimage");
+          var $current = $(event.target).find(".iconImage");
           if ($current.length)
           {
             var currentIngredient = Items.get($current.attr("data-item"));
@@ -996,6 +996,8 @@ $(document).keypress(function(e)
 
 $(window).on('beforeunload', function()
 {
+  if (!game) return;
+
   game.reclaimCraftingArea();
   if (game.autosave)
   {
