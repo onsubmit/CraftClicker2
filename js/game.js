@@ -458,6 +458,8 @@ function Game(args)
             var currentAmount = parseInt($currentAmount.text() || 1);
             var droppedAmount = parseInt($droppedAmount.text() || 1);
             var newAmount = currentAmount - droppedAmount;
+            game.player.inventory.consume(item, droppedAmount);
+
             if (newAmount === 1)
             {
               $currentAmount.hide();
@@ -687,7 +689,6 @@ function Game(args)
             });
           }
 
-          game.player.inventory.consume(e.data.arrIngredients);
           game.player.inventory.merge(arrDrops);
           game.drawInventory(arrDrops);
           game.clearCraftingOutput();
@@ -801,6 +802,8 @@ function Game(args)
         var currentAmount = parseInt($currentAmount.text() || 1);
         var newAmount = currentAmount + objReclaim[id];
         $currentAmount.text(newAmount);
+        this.player.inventory.mergeById(id, newAmount);
+        
         if (newAmount === 1)
         {
           // Don't show a badge when only one exists

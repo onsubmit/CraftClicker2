@@ -12,29 +12,23 @@ function Inventory(args)
       arrDrops.forEach(function(drop)
       {
         var amount = drop.amount || 1;
-        if (self.items[drop.item.id])
-        {
-          self.items[drop.item.id] += amount;
-        }
-        else
-        {
-          self.items[drop.item.id] = amount;
-        }
+        self.mergeById(drop.item.id, amount);
       });
     },
-    consume: function(arrIngredients)
+    mergeById: function(id, amount)
     {
-      // WARNING! This method does ABSOLUTELY NO bounds checking on the ingredients (on purpose).
-      // WARNING! The UI should prevent the player from consuming items they don't actually have.
-      var self = this;
-      arrIngredients.forEach2d(function(ingredient)
+      if (this.items[id])
       {
-        if (ingredient)
-        {
-          var amount = ingredient.amount || 1;
-          self.items[ingredient.item.id] -= amount
-        }
-      });
+        this.items[id] += amount;
+      }
+      else
+      {
+        this.items[id] = amount;
+      }
+    },
+    consume: function(item, amount)
+    {
+      this.items[item.id] -= amount;
     },
     toString: function()
     {
