@@ -108,6 +108,7 @@ div.accept, div#craftingOutput {
 #inventoryContainer {
   display: none;
   height: calc(100% - 65px);
+  position: relative;
 }
 
 #inventoryList {
@@ -153,7 +154,8 @@ div.accept, div#craftingOutput {
 }
 
 #inventoryMoveStacksLabel {
-  float: right;
+  position: absolute;
+  right: 0;
 }
 
 #middleColumn {
