@@ -65,21 +65,30 @@ Tile = function(args)
         if (objSquare.clusterSize === 0)
         {
           // The cluster has been fully mined.
-          // Advance the active square.
-          objLayer.squares[this.activeSquare.row][this.activeSquare.col] = undefined;
-          this.redrawSquare(this.activeSquare.row, this.activeSquare.col);
-          var wasReversed = this.advanceActiveRow();
-          if (wasReversed)
+          // Advance the active square unless an onMine event exists.
+          if (objSquare.item.onMine)
           {
-            this.getAllShadowedSquares().removeClass("shadowAll");
-            this.digLevel++;
+            objLayer.squares[this.activeSquare.row][this.activeSquare.col] = objSquare.item.onMine();
+            this.redrawSquare(this.activeSquare.row, this.activeSquare.col);
+            this.activateSquare(this.activeSquare.row, this.activeSquare.col);
           }
           else
           {
-            this.deactivateSquare();
+            objLayer.squares[this.activeSquare.row][this.activeSquare.col] = undefined;
+            this.redrawSquare(this.activeSquare.row, this.activeSquare.col);
+            var wasReversed = this.advanceActiveRow();
+            if (wasReversed)
+            {
+              this.getAllShadowedSquares().removeClass("shadowAll");
+              this.digLevel++;
+            }
+            else
+            {
+              this.deactivateSquare();
+            }
+            
+            this.activateSquare(this.activeSquare.row, this.activeSquare.col);
           }
-          
-          this.activateSquare(this.activeSquare.row, this.activeSquare.col);
         }
         else
         {

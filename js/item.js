@@ -11,6 +11,7 @@ Item = function(args)
   this.recipe = args.clone.recipe || args.recipe;
   this.gather = wasCloneProvided ? (args.clone.gather || Items.get(this.name).gather) : args.gather;
   this.onCraft = wasCloneProvided ? (args.clone.onCraft || Items.get(this.name).onCraft) : args.onCraft;
+  this.onMine = wasCloneProvided ? (args.clone.onMine || Items.get(this.name).onMine) : args.onMine;
   this.image = args.clone.image || args.image;
   this.pluralSuffix = args.clone.pluralSuffix || args.pluralSuffix;
 };

@@ -977,56 +977,6 @@ function Game(args)
       }));
 
       this.getOptionsDialog().dialog($.extend({}, commonDialogOptions,  { resizable: false, modal: true }));
-    },
-    setupOnCraftMethods: function()
-    {
-      var workBench = Items.get("Workbench");
-      workBench.oncraft = function(amount)
-      {
-        if (game.craftingLevel < 2)
-        {
-          game.setCraftingLevel(2);
-          amount--;
-        }
-
-        if (amount)
-        {
-          var arrDrops = 
-          [
-            {
-              item: workBench,
-              amount: amount
-            }
-          ];
-
-          game.player.inventory.merge(arrDrops);
-          return arrDrops;
-        }
-      };
-
-      var craftingTable = Items.get("Crafting Table");
-      craftingTable.oncraft = function(amount)
-      {
-        if (game.craftingLevel < 3)
-        {
-          game.setCraftingLevel(3);
-          amount--;
-        }
-
-        if (amount)
-        {
-          var arrDrops = 
-          [
-            {
-              item: craftingTable,
-              amount: amount
-            }
-          ];
-
-          game.player.inventory.merge(arrDrops);
-          return arrDrops;
-        }
-      };
     }
   });
 }
@@ -1038,6 +988,74 @@ var View =
 }
 
 var game = null;
+
+var setupOnCraftMethods = function()
+{
+  var workBench = Items.get("Workbench");
+  workBench.oncraft = function(amount)
+  {
+    if (game.craftingLevel < 2)
+    {
+      game.setCraftingLevel(2);
+      amount--;
+    }
+
+    if (amount)
+    {
+      var arrDrops = 
+      [
+        {
+          item: workBench,
+          amount: amount
+        }
+      ];
+
+      game.player.inventory.merge(arrDrops);
+      return arrDrops;
+    }
+  };
+
+  var craftingTable = Items.get("Crafting Table");
+  craftingTable.oncraft = function(amount)
+  {
+    if (game.craftingLevel < 3)
+    {
+      game.setCraftingLevel(3);
+      amount--;
+    }
+
+    if (amount)
+    {
+      var arrDrops = 
+      [
+        {
+          item: craftingTable,
+          amount: amount
+        }
+      ];
+
+      game.player.inventory.merge(arrDrops);
+      return arrDrops;
+    };
+  }
+};
+
+var setupOnMineMethods = function()
+{
+  Items.get("Tree").onMine = function(amount)
+  {
+    var grass = Items.get("Grass");
+    var square = 
+    {
+      item: grass,
+      hardness: grass.hardness,
+      clusterSize: 1
+    };
+
+    return square;
+  };
+}
+
 var load = function(prompt, saveData)
 {
   if (prompt)
@@ -1076,6 +1094,9 @@ function getParameterByName(name)
 
 $(document).ready(function()
 {
+  setupOnCraftMethods();
+  setupOnMineMethods();
+
   load(false /* prompt*/, null /* saveData */);
   game.drawItems();
   game.drawCraftingArea();
@@ -1085,7 +1106,6 @@ $(document).ready(function()
   game.setupClearCrafting();
   game.setupTakeSpinner();
   game.setupDialogs();
-  game.setupOnCraftMethods();
 
   game.getAutoSave().change(function()
   {
@@ -1114,9 +1134,49 @@ $(document).keypress(function(e)
   }
 
   e.preventDefault(); // Prevent page down on hitting space bar
-  if (e.which == 71 || e.which == 103 && game.getGather().isVisible()) // '[Gg]'
+  var key = String.fromCharCode(e.which).toLowerCase();
+
+  if (key === 'o')
   {
-    game.gather();
+    game.showOptionsDialog();
+  }
+  else if (game.getGather().isVisible())
+  {
+    switch (key)
+    {
+      case 'g':
+        game.gather();
+        break;
+      case 'r':
+      case 'z':
+        game.zoomOut();
+        break;
+    }
+  }
+  else if (key === 'z')
+  {
+    game.zoomIn();
+  }
+  else if (game.getOptionsDialog().isVisible())
+  {
+    switch (key)
+    {
+      case 'e':
+        game.export();
+        break;
+      case 'i':
+        game.import();
+        break;
+      case 'l':
+        load(true);
+        break;
+      case 'r':
+        game.reset();
+        break;
+      case 's':
+        game.save(true);
+        break;
+    }
   }
 });
 
