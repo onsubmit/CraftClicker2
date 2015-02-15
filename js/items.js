@@ -152,13 +152,13 @@ Items.add(
           amount: 1
         },
         {
-          item: Items.get("Lumber"),
+          item: Items.get("Stick"),
           amount: 1
         }
       ],
       [
         {
-          item: Items.get("Lumber"),
+          item: Items.get("Stick"),
           amount: 1
         },
         {
@@ -173,6 +173,7 @@ Items.add(
 Items.add(
 {
   id: 8,
+  meta: 1,
   name: "Workbench",
   pluralSuffix: "es",
   recipe: new Recipe(
@@ -183,6 +184,40 @@ Items.add(
         {
           item: Items.get("Lumber"),
           amount: 6
+        }
+      ]
+    ]
+  })
+});
+
+Items.add(
+{
+  id: 8,
+  meta: 2,
+  name: "Crafting Table",
+  pluralSuffix: "s",
+  recipe: new Recipe(
+  {
+    ingredients:
+    [
+      [
+        {
+          item: Items.get("Workbench"),
+          amount: 2
+        },
+        {
+          item: Items.get("Wood Plank"),
+          amount: 1
+        }
+      ],
+      [
+        {
+          item: Items.get("Wood Plank"),
+          amount: 1
+        },
+        {
+          item: Items.get("Workbench"),
+          amount: 2
         }
       ]
     ]

@@ -496,7 +496,7 @@ function Game(args)
             }
             else if (newAmount === 0)
             {
-              game.getInventoryItem(item.id).fadeOut();
+              game.getInventoryItem(item.id).hide();
             }
             else if (newAmount < 0)
             {
@@ -527,9 +527,17 @@ function Game(args)
 
           $icon.append($amount);
 
-          $icon.click(function()
+          $icon.click({ item: item, $amount: $amount }, function(e)
           {
-            console.log("Clicked");
+            var amount = parseInt(e.data.$amount.text() || 1);
+            if (amount === 1) return;
+
+            var newAmount = Math.floor(amount / 2);
+            e.data.$amount.text(newAmount);
+            var objReclaim = {};
+            objReclaim[e.data.item.id] = amount - newAmount;
+            game.reclaimIngredients(objReclaim);
+            game.checkRecipe();
           });
 
           $icon.draggable(
@@ -623,7 +631,7 @@ function Game(args)
 
           if (wasFromInventory && currentAmount === 0)
           {
-            game.getInventoryItem(item.id).fadeOut();
+            game.getInventoryItem(item.id).hide();
           }
         }
       });
@@ -825,8 +833,8 @@ function Game(args)
       });
 
       this.reclaimIngredients(objReclaim);
-      this.getCellsFromCraftingTable().fadeOutAndRemove();
-      this.getItemInOutput().fadeOutAndRemove();
+      this.getCellsFromCraftingTable().remove();
+      this.getItemInOutput().remove();
     },
     reclaimIngredients: function(objReclaim)
     {
@@ -852,7 +860,7 @@ function Game(args)
             $currentAmount.show();
           }
 
-          $item.fadeIn();
+          $item.show();
         }
         else if (currentAmount === 1)
         {
@@ -889,7 +897,7 @@ function Game(args)
       }
 
       // Center the crafting arrow.
-      game.getCraftingAction().css("padding-top", level * 8);
+      game.getCraftingAction().css("padding-top", (level - 1) * 17);
     },
     setupButtons: function()
     {
@@ -987,6 +995,30 @@ function Game(args)
           [
             {
               item: workBench,
+              amount: amount
+            }
+          ];
+
+          game.player.inventory.merge(arrDrops);
+          return arrDrops;
+        }
+      };
+
+      var craftingTable = Items.get("Crafting Table");
+      craftingTable.oncraft = function(amount)
+      {
+        if (game.craftingLevel < 3)
+        {
+          game.setCraftingLevel(3);
+          amount--;
+        }
+
+        if (amount)
+        {
+          var arrDrops = 
+          [
+            {
+              item: craftingTable,
               amount: amount
             }
           ];
