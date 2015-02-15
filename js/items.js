@@ -118,14 +118,15 @@ Items.add(
   recipe: new Recipe(
   {
     makes: 2,
-    isShaped: false,
     ingredients:
     [
       [
         {
           item: Items.get("Lumber"),
           amount: 1
-        },
+        }
+      ],
+      [
         {
           item: Items.get("Lumber"),
           amount: 1

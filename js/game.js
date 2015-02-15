@@ -3,6 +3,7 @@ function Game(args)
   args = args || {};
   args.clone = args.clone || {};
   this.version = args.clone.version || 0.01;
+  this.craftingLevel = args.clone.craftingLevel || 1;
   this.autosave = args.clone.autosave || true;
   this.autoSaveId = args.clone.autoSaveId || -1;
   this.minAnimationDuration = args.clone.minAnimationDuration || 1;
@@ -274,6 +275,8 @@ function Game(args)
     },
     drawInventory: function(arrDrops)
     {
+      if (!arrDrops) return;
+
       this.getInventoryContainer().fadeIn();
       var $list = this.getInventoryList();
 
@@ -336,6 +339,7 @@ function Game(args)
           start: function(event, ui)
           {
             var $amount = $(ui.helper).find(".iconAmount");
+            
             var doDragStacks = game.getIsInventoryMoveStacksChecked();
             if (doDragStacks)
             {
@@ -343,9 +347,6 @@ function Game(args)
               if (currentAmount < Items.stackSize)
               {
                 $amount.text(currentAmount);
-                var $elDrug = $(event.target);
-                var item = Items.get($elDrug.attr("data-item"));
-                game.getInventoryItem(item.id).fadeOut();
               }
               else
               {
@@ -360,6 +361,10 @@ function Game(args)
               $amount.text(1);
               $amount.hide();
             }
+          },
+          stop: function(event, ui)
+          {
+            // If 
           }
         });
 
@@ -439,9 +444,29 @@ function Game(args)
         };
       });
     },
-    setupDropTargets: function()
+    drawCraftingArea: function()
     {
-      $(".accept").droppable(
+      var $table = this.getCraftingTable();
+      for (var row = 0; row < this.craftingLevel; row++)
+      {
+        var $tr = $("<tr/>");
+        for (var col = 0; col < this.craftingLevel; col++)
+        {
+          var $td = $("<td/>");
+          $td.attr("data-cpos", row + "," + col);
+
+          var $div = $("<div/>", { class: "accept"} );
+          $td.append($div);
+          $tr.append($td);
+        }
+
+        $table.append($tr);
+      }
+    },
+    setupDropTargets: function($td)
+    {
+      var $elements = $td || $(".accept");
+      $elements.droppable(
       {
         accept: ".iconImage",
         tolerance: "touch",
@@ -453,14 +478,15 @@ function Game(args)
           var itemName = $elDrug.attr("data-item");
           var item = Items.get(itemName);
 
+          var $droppedAmount = $elClone.find(".iconAmount");
+          var droppedAmount = parseInt($droppedAmount.text() || 1);
+
           if (wasFromInventory)
           {
             // This event fires for each matched drop target.
             // Ensure more than items that what the player has don't get dropped.
             var $currentAmount = $elDrug.find(".iconAmount");
-            var $droppedAmount = $elClone.find(".iconAmount");
             var currentAmount = parseInt($currentAmount.text() || 1);
-            var droppedAmount = parseInt($droppedAmount.text() || 1);
             var newAmount = currentAmount - droppedAmount;
             game.player.inventory.consume(item, droppedAmount);
 
@@ -500,6 +526,11 @@ function Game(args)
           }
 
           $icon.append($amount);
+
+          $icon.click(function()
+          {
+            console.log("Clicked");
+          });
 
           $icon.draggable(
           {
@@ -547,7 +578,12 @@ function Game(args)
           $icon.addClass("dropped");
           $(ui.helper).addClass("dropped");
 
-          var $current = $(event.target).find(".iconImage");
+          // TODO: Clean this up
+          var $target = $(event.target);
+          var targetCoords = $target.parent().attr("data-cpos");
+          var sourceCoords = $elDrug.parent().parent().attr("data-cpos");
+          var $current = $target.find(".iconImage");
+
           if ($current.length)
           {
             var currentIngredient = Items.get($current.attr("data-item"));
@@ -558,17 +594,10 @@ function Game(args)
             var newIngredientAmount = parseInt($newIngredientAmount.text() || 1);
 
             var $parent = $(ui.helper).parent();
-            if (currentIngredient == newIngredient)
+            if (targetCoords !== sourceCoords && currentIngredient == newIngredient)
             {
-              if (!$parent.hasClass("accept"))
-              {
                 // There is already the same item in this square. Add to it.
                 $newIngredientAmount.text(currentIngredientAmount + newIngredientAmount);
-              }
-              else
-              {
-                // TODO: Needed at 2x2?
-              }
             }
             else
             {                        
@@ -704,7 +733,16 @@ function Game(args)
           }
         ];
 
-        game.player.inventory.merge(arrDrops);
+        if (e.data.craftableItem.item.oncraft)
+        {
+          // Item has a custom method to invoke after being crafted, e.g. Workbench
+          arrDrops = e.data.craftableItem.item.oncraft(amountToCraft);
+        }
+        else
+        {
+          game.player.inventory.merge(arrDrops);
+        }
+        
         game.drawInventory(arrDrops);
         game.clearCraftingOutput();
         game.checkRecipe();
@@ -822,6 +860,37 @@ function Game(args)
         }
       }
     },
+    setCraftingLevel: function(level)
+    {
+      this.craftingLevel = level;
+      var table = document.getElementById("craftingTable");
+      for (var row = 0; row < level; row++)
+      {
+        var $tr = (row < level - 1 ? $(table.rows[row]) : $("<tr/>"));
+        for (var col = 0; col < level; col++)
+        {
+          if (row === level - 1 || col === level - 1)
+          {
+            // Add new cell to each row
+            var $td = $("<td/>");
+            $td.attr("data-cpos", row + "," + col);
+            var $div = $("<div/>", { class: "accept" });
+            this.setupDropTargets($div);
+            $td.append($div);
+            $tr.append($td.fadeIn());
+          }
+        }
+
+        if (row === level - 1)
+        {
+          // Add new row at the end
+          $(table).append($tr.fadeIn());
+        }
+      }
+
+      // Center the crafting arrow.
+      game.getCraftingAction().css("padding-top", level * 8);
+    },
     setupButtons: function()
     {
       this.getZoomIn().click(function() { game.zoomIn(); });
@@ -900,6 +969,32 @@ function Game(args)
       }));
 
       this.getOptionsDialog().dialog($.extend({}, commonDialogOptions,  { resizable: false, modal: true }));
+    },
+    setupOnCraftMethods: function()
+    {
+      var workBench = Items.get("Workbench");
+      workBench.oncraft = function(amount)
+      {
+        if (game.craftingLevel < 2)
+        {
+          game.setCraftingLevel(2);
+          amount--;
+        }
+
+        if (amount)
+        {
+          var arrDrops = 
+          [
+            {
+              item: workBench,
+              amount: amount
+            }
+          ];
+
+          game.player.inventory.merge(arrDrops);
+          return arrDrops;
+        }
+      };
     }
   });
 }
@@ -951,12 +1046,14 @@ $(document).ready(function()
 {
   load(false /* prompt*/, null /* saveData */);
   game.drawItems();
+  game.drawCraftingArea();
   game.setupButtons();
   game.setupFilters();
   game.setupDropTargets();
   game.setupClearCrafting();
   game.setupTakeSpinner();
   game.setupDialogs();
+  game.setupOnCraftMethods();
 
   game.getAutoSave().change(function()
   {

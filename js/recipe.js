@@ -68,12 +68,12 @@ Recipe = function(args)
                 determineMinCraftableAmount(ingredient.amount, this.ingredients[row][col].amount);
               }
             }
-            else if (row < self.rows && col < self.cols && this.ingredients[row][col])
+            else if (this.ingredients[row] && this.ingredients[row][col])
             {
               // An ingredient is missing.
               return 0;
             }
-            else
+            else if (ingredient)
             {
               determineMinCraftableAmount(ingredient.amount, this.ingredients[row][col].amount);
             }

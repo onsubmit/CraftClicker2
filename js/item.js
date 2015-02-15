@@ -10,6 +10,7 @@ Item = function(args)
   this.hidden = typeof args.clone.hidden !== 'undefined' ? !!args.clone.hidden : !!args.hidden;
   this.recipe = args.clone.recipe || args.recipe;
   this.gather = wasCloneProvided ? (args.clone.gather || Items.get(this.name).gather) : args.gather;
+  this.onCraft = wasCloneProvided ? (args.clone.onCraft || Items.get(this.name).onCraft) : args.onCraft;
   this.image = args.clone.image || args.image;
   this.pluralSuffix = args.clone.pluralSuffix || args.pluralSuffix;
 };

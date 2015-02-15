@@ -52,6 +52,10 @@ $.extend(Game.prototype,
   {
     return $("#worldContainer");
   },
+  getCraftingContainer: function()
+  {
+    return $("#craftingContainer");
+  },
   getCraftingTable: function()
   {
     return $("#craftingTable");
@@ -67,6 +71,10 @@ $.extend(Game.prototype,
   getItemInOutput: function()
   {
     return $(".crafted");
+  },
+  getCraftingAction: function()
+  {
+    return $("#craftingAction");
   },
   getCraftingOutput: function()
   {
