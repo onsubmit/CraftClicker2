@@ -645,6 +645,7 @@ function Game(args)
       var cols = table.rows[0].cells.length;
       var arrIngredients = (new Array(rows)).assignEach(function() { return new Array(cols); });
 
+      var numFound = 0;
       for (var row = 0; row < rows; row++)
       {
         for (var col = 0; col < cols; col++)
@@ -653,18 +654,95 @@ function Game(args)
           var $ingredient = $cell.find(".crafting.dropped");
           if ($ingredient.length)
           {
+            numFound++;
             var item = Items.get($ingredient.attr("data-item"));
             var amount = parseInt($ingredient.find(".iconAmount").text() || 1);
             arrIngredients[row][col] = 
             {
               item: item,
-              amount: amount
+              amount: amount,
+              uiPosition: { row: row, col: col}
             };
           }
         }
       }
 
-      return arrIngredients;
+      // If there are fewer ingredients than number of cells in the crafting area.
+      // There could be empty rows or columns that we need to trim off to allow for
+      // crafting 2x2 recipes in a 3x3 grid for example.
+      return this.trimEmptyRowsAndColumnsFromIngredients(arrIngredients);
+    },
+    trimEmptyRowsAndColumnsFromIngredients: function(arrIngredients)
+    {
+      if (numFound > 0 && numFound < rows * cols)
+      {
+        // Remove any leading empty rows
+        for (var row = 0; row < arrIngredients.length; row++)
+        {
+          if (arrIngredients[row].every(function(item) { return !item; }))
+          {
+            arrIngredients.splice(row--, 1);
+          }
+          else
+          {
+            // We can't remove any empty rows between any non-empty rows
+            // This would allow a Lumber in the first and third rows craft into a Stick.
+            break;
+          }
+        }
+
+        // Remove any trailing empty rows
+        for (var row = arrIngredients.length - 1; row >= 0; row--)
+        {
+          if (arrIngredients[row].every(function(item) { return !item; }))
+          {
+            arrIngredients.splice(row, 1);
+          }
+          else
+          {
+            // We can't remove any empty rows between any non-empty rows
+            break;
+          }
+        }
+
+        // Remove any leading empty columns
+        for (var col = 0; col < arrIngredients[0].length; col++)
+        {
+          if (arrIngredients.every(function(item) { return !item[col]; }))
+          {
+            for (var row = 0; row < arrIngredients.length; row++)
+            {
+              arrIngredients[row].splice(col, 1);
+            }
+
+            col--;
+          }
+          else
+          {
+            // We can't remove any empty columns between any non-empty columns
+            break;
+          }
+        }
+
+        // Remove any trailing empty columns
+        for (var col = arrIngredients[0].length - 1; col >= 0; col--)
+        {
+          if (arrIngredients.every(function(item) { return !item[col]; }))
+          {
+            for (var row = 0; row < arrIngredients.length; row++)
+            {
+              arrIngredients[row].splice(col, 1);
+            }
+          }
+          else
+          {
+            // We can't remove any empty columns between any non-empty columns
+            break;
+          }
+        }
+
+        return arrIngredients;
+      }
     },
     checkRecipe: function()
     {
@@ -719,7 +797,7 @@ function Game(args)
         {
           if (ingredient)
           {
-            var $ingredient = game.getCellFromCraftingTable(row, col);
+            var $ingredient = game.getCellFromCraftingTable(ingredient.uiPosition.row, ingredient.uiPosition.col);
 
             ingredient.amount -= multiplier * e.data.craftableItem.item.recipe.ingredients[row][col].amount;
             if (ingredient.amount === 0)
