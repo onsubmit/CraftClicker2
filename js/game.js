@@ -10,6 +10,7 @@ function Game(args)
   this.currentView = args.clone.currentView || View.World;
   this.player = new Player(args.clone.player && { clone: args.clone.player });
   this.world = new World((args.clone.world && { clone: args.clone.world }) || { rows: 3, cols: 3 });
+  this.unlockedItems = args.clone.unlockedItems || [];
 
   $.extend(Game.prototype,
   {
@@ -271,7 +272,39 @@ function Game(args)
       {
         this.player.inventory.merge(arrDrops);
         this.drawInventory(arrDrops);
+        this.unlockNewItems(arrDrops, true /* fRecurse */);
       }
+    },
+    unlockNewItems: function(arrDrops, fRecurse)
+    {
+        var newItemsToDraw = [];
+        arrDrops.forEach(function(drop)
+        {
+          // Unlock items the drop unlocks
+          if (fRecurse && drop.item.unlocks)
+          {
+            var unlocks = drop.item.unlocks.map(function(unlockedItemName) { return { item: Items.get(unlockedItemName) }; });
+            game.unlockNewItems(unlocks);
+            drop.item.unlocks = undefined;
+          }
+
+          // Add any newly discovered drops to the list of unlocked items
+          game.unlockedItems.pushIf((function()
+          {
+            var itemNotYetUnlocked = ($.inArray(drop.item.name, game.unlockedItems) === -1);
+            if (itemNotYetUnlocked)
+            {
+              newItemsToDraw.push(drop.item);
+            }
+
+            return itemNotYetUnlocked;
+          })(), drop.item.name);
+        });
+
+        if (newItemsToDraw.length)
+        {
+          this.drawNewItems(newItemsToDraw);
+        }
     },
     drawInventory: function(arrDrops)
     {
@@ -430,8 +463,9 @@ function Game(args)
     drawItems: function()
     {
       var $itemList = $("#itemList");
-      Items.forEach(function(item)
+      this.unlockedItems.forEach(function(itemName)
       {
+        var item = Items.get(itemName);
         if (!item.hidden)
         {
           var $img = $("<img/>",
@@ -442,6 +476,64 @@ function Game(args)
           }).attr("data-itemname", item.name)
           .appendTo($itemList);
         };
+      });
+    },
+    drawNewItems: function(arrItems)
+    {
+      var $itemList = $("#itemList");
+      arrItems.forEach(function(item)
+      {
+        if (!item.hidden)
+        {
+          var $img = $("<img/>",
+          {
+            src: item.image,
+            class: "itemListItem filterableItem",
+            title: item.name
+          }).attr("data-itemname", item.name);
+
+          var wasInserted = false;
+          var $imgs = $itemList.find('img');
+          var $metaImg = null;
+          $imgs.each(function()
+          {
+            var listItemName = $(this).attr('data-itemname');
+            var listItem = Items.get(listItemName);
+
+            if (listItem.id > item.id)
+            {
+              // We're past the item's ID -- insert
+              wasInserted = true;
+              $img.insertBefore($(this));
+              return false;
+            }
+            else if (item.id === listItem.id)
+            {
+              // Item's have the same ID -- find where to insert amongst the other meta IDs
+              $metaImg = $metaImg || $(this);
+              if (listItem.meta > item.meta)
+              {
+                wasInserted = true;
+                $img.insertBefore($metaImg);
+                return false;
+              }
+            }
+          });
+
+          if (!wasInserted)
+          {
+            if ($metaImg)
+            {
+              // Place at the end of the items with the same IDs
+              $img.insertAfter($metaImg);
+            }
+            else
+            {
+              // Place at the end
+              $img.appendTo($itemList);
+            }
+          }
+        }
       });
     },
     drawCraftingArea: function()
@@ -670,79 +762,81 @@ function Game(args)
       // If there are fewer ingredients than number of cells in the crafting area.
       // There could be empty rows or columns that we need to trim off to allow for
       // crafting 2x2 recipes in a 3x3 grid for example.
-      return this.trimEmptyRowsAndColumnsFromIngredients(arrIngredients);
+      if (numFound > 0 && numFound < rows * cols)
+      {
+        arrIngredients = this.trimEmptyRowsAndColumnsFromIngredients(arrIngredients);
+      }
+
+      return arrIngredients;
     },
     trimEmptyRowsAndColumnsFromIngredients: function(arrIngredients)
     {
-      if (numFound > 0 && numFound < rows * cols)
+      // Remove any leading empty rows
+      for (var row = 0; row < arrIngredients.length; row++)
       {
-        // Remove any leading empty rows
-        for (var row = 0; row < arrIngredients.length; row++)
+        if (arrIngredients[row].every(function(item) { return !item; }))
         {
-          if (arrIngredients[row].every(function(item) { return !item; }))
-          {
-            arrIngredients.splice(row--, 1);
-          }
-          else
-          {
-            // We can't remove any empty rows between any non-empty rows
-            // This would allow a Lumber in the first and third rows craft into a Stick.
-            break;
-          }
+          arrIngredients.splice(row--, 1);
         }
-
-        // Remove any trailing empty rows
-        for (var row = arrIngredients.length - 1; row >= 0; row--)
+        else
         {
-          if (arrIngredients[row].every(function(item) { return !item; }))
-          {
-            arrIngredients.splice(row, 1);
-          }
-          else
-          {
-            // We can't remove any empty rows between any non-empty rows
-            break;
-          }
+          // We can't remove any empty rows between any non-empty rows
+          // This would allow a Lumber in the first and third rows craft into a Stick.
+          break;
         }
-
-        // Remove any leading empty columns
-        for (var col = 0; col < arrIngredients[0].length; col++)
-        {
-          if (arrIngredients.every(function(item) { return !item[col]; }))
-          {
-            for (var row = 0; row < arrIngredients.length; row++)
-            {
-              arrIngredients[row].splice(col, 1);
-            }
-
-            col--;
-          }
-          else
-          {
-            // We can't remove any empty columns between any non-empty columns
-            break;
-          }
-        }
-
-        // Remove any trailing empty columns
-        for (var col = arrIngredients[0].length - 1; col >= 0; col--)
-        {
-          if (arrIngredients.every(function(item) { return !item[col]; }))
-          {
-            for (var row = 0; row < arrIngredients.length; row++)
-            {
-              arrIngredients[row].splice(col, 1);
-            }
-          }
-          else
-          {
-            // We can't remove any empty columns between any non-empty columns
-            break;
-          }
-        }
-
-        return arrIngredients;
       }
+
+      // Remove any trailing empty rows
+      for (var row = arrIngredients.length - 1; row >= 0; row--)
+      {
+        if (arrIngredients[row].every(function(item) { return !item; }))
+        {
+          arrIngredients.splice(row, 1);
+        }
+        else
+        {
+          // We can't remove any empty rows between any non-empty rows
+          break;
+        }
+      }
+
+      // Remove any leading empty columns
+      for (var col = 0; col < arrIngredients[0].length; col++)
+      {
+        if (arrIngredients.every(function(item) { return !item[col]; }))
+        {
+          for (var row = 0; row < arrIngredients.length; row++)
+          {
+            arrIngredients[row].splice(col, 1);
+          }
+
+          col--;
+        }
+        else
+        {
+          // We can't remove any empty columns between any non-empty columns
+          break;
+        }
+      }
+
+      // Remove any trailing empty columns
+      for (var col = arrIngredients[0].length - 1; col >= 0; col--)
+      {
+        if (arrIngredients.every(function(item) { return !item[col]; }))
+        {
+          for (var row = 0; row < arrIngredients.length; row++)
+          {
+            arrIngredients[row].splice(col, 1);
+          }
+        }
+        else
+        {
+          // We can't remove any empty columns between any non-empty columns
+          break;
+        }
+      }
+
+      return arrIngredients;
     },
     checkRecipe: function()
     {
@@ -827,6 +921,13 @@ function Game(args)
         else
         {
           game.player.inventory.merge(arrDrops);
+        }
+
+        if (e.data.craftableItem.item.unlocks)
+        {
+          var unlocks = e.data.craftableItem.item.unlocks.map(function(unlockedItemName) { return { item: Items.get(unlockedItemName) }; });
+          game.unlockNewItems(unlocks);
+          e.data.craftableItem.item.unlocks = undefined;
         }
         
         game.drawInventory(arrDrops);

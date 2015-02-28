@@ -88,13 +88,15 @@ Items.add(
 Items.add(
 {
   id: 4,
-  name: "Wood"
+  name: "Wood",
+  unlocks: [ "Lumber" ]
 });
 
 Items.add(
 {
   id: 5,
   name: "Lumber",
+  unlocks: [ "Stick", "Workbench" ],
   recipe: new Recipe(
   {
     makes: 4,
@@ -115,6 +117,7 @@ Items.add(
   id: 6,
   name: "Stick",
   pluralSuffix: "s",
+  unlocks: [ "Wood Plank" ],
   recipe: new Recipe(
   {
     makes: 2,
@@ -141,6 +144,7 @@ Items.add(
   id: 7,
   name: "Wood Plank",
   pluralSuffix: "s",
+  unlocks: [ "Workbench" ],
   recipe: new Recipe(
   {
     makes: 2,
@@ -176,6 +180,7 @@ Items.add(
   meta: 1,
   name: "Workbench",
   pluralSuffix: "es",
+  unlocks: [ "Crafting Table" ],
   recipe: new Recipe(
   {
     ingredients:

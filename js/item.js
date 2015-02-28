@@ -14,6 +14,7 @@ Item = function(args)
   this.onMine = wasCloneProvided ? (args.clone.onMine || Items.get(this.name).onMine) : args.onMine;
   this.image = args.clone.image || args.image;
   this.pluralSuffix = args.clone.pluralSuffix || args.pluralSuffix;
+  this.unlocks = args.clone.unlocks || args.unlocks;
 };
 
 $.extend(Item.prototype,
