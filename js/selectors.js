@@ -120,6 +120,30 @@ $.extend(Game.prototype,
   {
     return $("#itemList");
   },
+  getItemTooltip: function()
+  {
+    return $("#itemTooltip");
+  },
+  getItemTooltipIcon: function()
+  {
+    return $("#itemTooltipIcon");
+  },
+  getItemTooltipName: function()
+  {
+    return $("#itemTooltipName");
+  },
+  getItemMenu: function()
+  {
+    return $("#itemMenu");
+  },
+  getItemMenuRecipe: function()
+  {
+    return $("#itemMenuRecipe");
+  },
+  getItemMenuUses: function()
+  {
+    return $("#itemMenuUses");
+  },
   getClearCraft: function()
   {
     return $("#clearCraft");
@@ -152,12 +176,40 @@ $.extend(Game.prototype,
   {
     return $("#optionsDialog");
   },
+  getCraftingDialog: function()
+  {
+    return $("#craftingDialog");
+  },
   clearCraftingTable: function()
   {
     this.getCellsFromCraftingTable().remove();
   },
+  getCraftingDialogAction: function()
+  {
+    return $("#craftingDialogAction");
+  },
+  getCraftingDialogOutputTable: function()
+  {
+    return $("#craftingDialogOutputTable");
+  },
+  getCraftingDialogOutput: function()
+  {
+    return $("#craftingDialogOutput");
+  },
+  getCraftingDialogUseIndex: function()
+  {
+    return $("#craftingDialogUseIndex");
+  },
+  getCraftingDialogUses: function()
+  {
+    return $("#craftingDialogUses");
+  },
   clearCraftingOutput: function()
   {
     return this.getCraftingOutput().empty();
-  }
+  },
+  getCraftingDialogTable: function()
+  {
+    return $("#craftingDialogTable");
+  },
 });

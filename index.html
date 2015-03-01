@@ -16,8 +16,8 @@
     <script src="js/game.js"></script>
     <script src="js/selectors.js"></script>
     <script src="js/tests.js"></script>
-    <link href="css/styles.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
+    <link href="css/styles.css" rel="stylesheet" />
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="apple-touch-icon" href="images/icons/ios/Icon.png"/>  
     <link rel="apple-touch-icon" sizes="72x72" href="images/icons/Icon-72.png"/>  
@@ -47,7 +47,7 @@
           <div class="clearBoth"></div>
         </div>
         <div id="inventoryContainer" class="clearBoth">
-          <input id="inventoryFilter" class="filter" type="textbox" placeholder="Filter" />
+          <input id="inventoryFilter" class="filter" type="textbox" placeholder="Filter" /><br />
           <label id="inventoryMoveStacksLabel"><input id="inventoryMoveStacks" type="checkbox" />Drag stacks</label>
           <ul id="inventoryList"></ul>
         </div>
@@ -58,6 +58,14 @@
         <input id="itemFilter" class="filter" type="textbox" placeholder="Filter" />
         <div id="itemList"></div>
         <button id="options" class="big"><u>O</u>ptions</button>
+      </div>
+      <div id="itemTooltip">
+        <img id="itemTooltipIcon" class="floatRight" />
+        <p id="itemTooltipName"></p>
+        <ul id="itemMenu">
+          <li id="itemMenuRecipe"><a href="#">Recipe</a></li>
+          <li id="itemMenuUses"><a href="#">Uses</a></li>
+        </ul>
       </div>
     </div>
     <div id="middleColumn">
@@ -85,6 +93,19 @@
         <button id="export"class="big"><u>E</u>xport</button>
         <button id="import"class="big"><u>I</u>mport</button>
         <button id="reset" class="big red"><u>R</u>eset</button>
+      </div>
+    </div>
+    <div id="craftingDialog">
+      <table id="craftingDialogTable"></table>
+      <div id="craftingDialogAction">
+        <div id="craftDialogArrow">
+          <img src="images/ArrowRight.png" />
+        </div>
+        <table id="craftingDialogOutputTable">
+          <tr>
+            <td class="craftingCell"><div id="craftingDialogOutput"></div></td>
+          </tr>
+        </table>
       </div>
     </div>
   </body>

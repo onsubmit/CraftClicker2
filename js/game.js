@@ -436,9 +436,8 @@ function Game(args)
         }
       }
 
-      var strTitle = Number(amount).toLocaleString('en') + " " + item.name + (amount !== 1 ? item.pluralSuffix : "");
       game.getInventoryItem(item.id).show();
-      game.getInventoryIcon(item.id).attr("title", strTitle);
+      game.getInventoryIcon(item.id).attr("title", item.name);
       game.getInventoryAmount(item.id).text(game.getAmountForBadge(amount));
     },
     getAmountForBadge: function(amount)
@@ -468,13 +467,8 @@ function Game(args)
         var item = Items.get(itemName);
         if (!item.hidden)
         {
-          var $img = $("<img/>",
-          {
-            src: item.image,
-            class: "itemListItem filterableItem",
-            title: item.name
-          }).attr("data-itemname", item.name)
-          .appendTo($itemList);
+          var $img = game.generateItemImage(item, "itemListItem filterableItem");
+          $img.appendTo($itemList);
         };
       });
     },
@@ -485,13 +479,7 @@ function Game(args)
       {
         if (!item.hidden)
         {
-          var $img = $("<img/>",
-          {
-            src: item.image,
-            class: "itemListItem filterableItem",
-            title: item.name
-          }).attr("data-itemname", item.name);
-
+          var $img = game.generateItemImage(item, "itemListItem filterableItem");
           var wasInserted = false;
           var $imgs = $itemList.find('img');
           var $metaImg = null;
@@ -536,6 +524,170 @@ function Game(args)
         }
       });
     },
+    generateItemImage: function(item, strClass)
+    {
+      var $img = $("<img/>",
+      {
+        src: item.image,
+        class: strClass,
+        title: item.name
+      }).attr("data-itemname", item.name);
+
+      $img.on("click", { item: item, $img: $img }, function(e)
+      {
+        game.drawItemTooltip(e);
+        e.stopPropagation();
+      });
+
+      return $img;
+    },
+    drawItemTooltip: function(e)
+    {
+      game.getItemTooltipIcon().attr("src", e.data.item.image);
+      game.getItemTooltipName().text(e.data.item.name);
+      game.getItemMenuRecipe().off("click").on("click", { item: e.data.item }, function(e2)
+      {
+        game.getCraftingDialog().dialog("option", "title", "Recipe");
+        game.getCraftingDialog().dialog("option", "buttons", 
+        [
+          {
+            text: "Craft",
+            icons:
+            {
+              primary: "ui-icon-transferthick-e-w"
+            },
+            click: function()
+            {
+              var size = Math.max(e.data.item.recipe.ingredients.length, e.data.item.recipe.ingredients[0].length);
+              if (size <= game.craftingLevel)
+              {
+                // TODO: IMPLEMENT THIS
+                /*
+                var $table = game.getCraftingTable();
+                for (var row = 0; row < size; row++)
+                {
+                  var $tr = $("<tr/>");
+                  for (var col = 0; col < size; col++)
+                  {
+                    var $td = $("<td/>");
+                    $td.attr("data-cpos", row + "," + col);
+
+                    var ingredient = drawOutput.recipe.ingredients[row][col];
+                    if (ingredient)
+                    {
+                      $td.append($("<div/>").append(game.generateItemImage(ingredient.item)));
+                    }
+                    
+                    $tr.append($td);
+                  }
+
+                  $table.append($tr);
+                }
+                */
+              }
+
+              $(this).dialog("close");
+            }
+          }
+        ]);
+
+        game.drawCraftingDialog(e2.data.item);
+      });
+
+      game.getItemMenuUses().off("click").on("click", { item: e.data.item }, function(e3)
+      {
+        game.getCraftingDialog().dialog("option", "title", "Uses");
+        if (e3.data.item.usedBy.length > 1)
+        {
+          game.getCraftingDialog().dialog("option", "buttons", 
+          [
+            {
+              text: "Previous",
+              icons:
+              {
+                primary: "ui-icon-arrowthick-1-w"
+              },
+              click: function()
+              {
+                var useIndex = (parseInt(game.getCraftingDialogUseIndex().text()) || 1) - 1;
+                game.drawCraftingDialog(e3.data.item, useIndex - 1 /* iUseIndex */);
+              }
+            },
+            {
+              text: "Next",
+              icons:
+              {
+                primary: "ui-icon-arrowthick-1-e"
+              },
+              click: function()
+              {
+                var useIndex = (parseInt(game.getCraftingDialogUseIndex().text()) || 1) - 1;
+                game.drawCraftingDialog(e3.data.item, useIndex + 1 /* iUseIndex */);
+              }
+            }
+          ]);
+        }
+        else
+        {
+          game.getCraftingDialog().dialog("option", "buttons", []);
+        }
+
+
+        game.drawCraftingDialog(e3.data.item, 0 /* iUseIndex */);
+      });
+
+      var $tooltip = game.getItemTooltip();
+      $tooltip.hide();
+
+      var imgWidth = e.data.$img.width();
+      var imgHeight = e.data.$img.height();
+      var left = e.pageX + 2;
+      var top = e.pageY + 2;
+      var tooltipWidth = $tooltip.width();
+      var tooltipHeight = $tooltip.height();
+
+      if (left + imgWidth + tooltipWidth > $(window).width())
+      {
+        left = left - tooltipWidth - 2;
+      }
+
+      if (top + imgHeight + tooltipHeight > $(window).height())
+      {
+        top = top - tooltipHeight - 2;
+      }
+
+      var areBothMenuItemsHidden = true;
+      if (e.data.item.recipe)
+      {
+        areBothMenuItemsHidden = false;
+        game.getItemMenuRecipe().show();
+      }
+      else
+      {
+        game.getItemMenuRecipe().hide();
+      }
+
+      if (e.data.item.usedBy)
+      {
+        areBothMenuItemsHidden = false;
+        game.getItemMenuUses().show();
+      }
+      else
+      {
+        game.getItemMenuUses().hide();
+      }
+
+      if (areBothMenuItemsHidden)
+      {
+        game.getItemMenu().hide();
+      }
+      else
+      {
+        game.getItemMenu().show();
+      }
+
+      $tooltip.css({ 'left' : left, 'top' : top }).show();
+    },
     drawCraftingArea: function()
     {
       var $table = this.getCraftingTable();
@@ -554,6 +706,68 @@ function Game(args)
 
         $table.append($tr);
       }
+    },
+    drawCraftingDialog: function(item, iUseIndex)
+    {
+      var $table = this.getCraftingDialogTable().empty();
+
+      var drawOutput = item;
+      if (iUseIndex || iUseIndex === 0)
+      {
+        if (iUseIndex === -1)
+        {
+          // Loop to end
+          iUseIndex = item.usedBy.length - 1;
+        }
+        else if (iUseIndex === item.usedBy.length)
+        {
+          // Loop to beginning
+          iUseIndex = 0;
+        }
+
+        drawOutput = Items.get(item.usedBy[iUseIndex]);
+
+        var $useIndex = game.getCraftingDialogUseIndex();
+        if (!$useIndex.length)
+        {
+          $table.after($("<div/>",
+          {
+            id: "craftingDialogUseIndex",
+          }).hide());
+        }
+
+        $useIndex.text(iUseIndex + 1);
+
+        if (item.usedBy.length !== 1)
+        {
+          game.getCraftingDialog().dialog("option", "title", "Uses \u2014 Page " + (iUseIndex + 1) + " of " + item.usedBy.length);
+        }
+      }
+
+      var size = Math.max(drawOutput.recipe.ingredients.length, drawOutput.recipe.ingredients[0].length);
+      for (var row = 0; row < size; row++)
+      {
+        var $tr = $("<tr/>");
+        for (var col = 0; col < size; col++)
+        {
+          var $td = $("<td/>");
+          $td.attr("data-cpos", row + "," + col);
+
+          var ingredient = drawOutput.recipe.ingredients[row][col];
+          if (ingredient)
+          {
+            $td.append($("<div/>").append(game.generateItemImage(ingredient.item)));
+          }
+          
+          $tr.append($td);
+        }
+
+        $table.append($tr);
+      }
+
+      game.getCraftingDialogAction().css("padding-top", (size - 1) * 17);
+      game.getCraftingDialogOutput().empty().append($("<div/>").append(game.generateItemImage(drawOutput)));
+      game.getCraftingDialog().dialog("open");
     },
     setupDropTargets: function($td)
     {
@@ -1155,7 +1369,16 @@ function Game(args)
         ]
       }));
 
-      this.getOptionsDialog().dialog($.extend({}, commonDialogOptions,  { resizable: false, modal: true }));
+      this.getOptionsDialog().dialog($.extend({}, commonDialogOptions, { resizable: false, modal: true }));
+      var craftingDialogOptions = $.extend({}, commonDialogOptions, { height: 300 });
+      craftingDialogOptions.open = function (event, ui)
+      {
+        commonDialogOptions.open(event, ui);
+        var overrides = ['.ui-dialog', '.ui-dialog-buttonpane'];
+        overrides.forEach(function(o) { $(o).addClass('craftingDialog'); });
+      };
+
+      this.getCraftingDialog().dialog(craftingDialogOptions);
     }
   });
 }
@@ -1247,7 +1470,7 @@ var load = function(prompt, saveData)
     game.getOptionsDialog().dialog("close");
   }
   
-  var data = saveData || localStorage['CraftClicker2'];
+  var data = saveData || (localStorage && localStorage['CraftClicker2']);
   if (data)
   {
     var savedGame = JSON.parse(atob(data));
@@ -1286,6 +1509,8 @@ $(document).ready(function()
   game.setupTakeSpinner();
   game.setupDialogs();
 
+  game.getItemTooltip().hide();
+
   game.getAutoSave().change(function()
   {
     game.autosave = $(this).is(':checked');
@@ -1301,7 +1526,9 @@ $(document).ready(function()
   });
   
   game.autoSaveId = setInterval(game.save, 10000);
-  
+
+  // Prevent right-click
+  $(document).bind("contextmenu", function(e) { return false; });
 });
 
 $(document).keypress(function(e)
@@ -1356,6 +1583,15 @@ $(document).keypress(function(e)
         game.save(true);
         break;
     }
+  }
+});
+
+$(document).on("click touchend", function(e)
+{
+  var $tooltip = null;
+  if(($tooltip = game.getItemTooltip()).isVisible())
+  {
+      $tooltip.hide();
   }
 });
 

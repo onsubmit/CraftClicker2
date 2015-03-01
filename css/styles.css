@@ -34,13 +34,13 @@ h1, h2, h3, h4, h5, h6, p {
   padding-bottom: 10px;
 }
 
-#craftingTable {
+#craftingTable, #craftingDialogTable {
   empty-cells: show;
   border-spacing: 0px;
   float: left;
 }
 
-#craftingTable td, td.craftingCell {
+#craftingTable td, #craftingDialogTable td, td.craftingCell {
   width: 24px;
   height: 32px;
   min-width: 24px;
@@ -53,7 +53,7 @@ h1, h2, h3, h4, h5, h6, p {
   border-bottom: 2px solid #fff;
 }
 
-div.accept, div#craftingOutput {
+div.accept, div#craftingOutput, div #craftingDialogOutput {
   width: 24px;
   height: 24px;
   min-width: 24px;
@@ -79,7 +79,12 @@ div.accept, div#craftingOutput {
   float: left;
 }
 
-#craftingOutputTable {
+#craftDialogArrow {
+  padding: 10px 5px 0 5px;
+  float: left;
+}
+
+#craftingOutputTable, #craftingDialogOutputTable {
   empty-cells: show;
   border-spacing: 0px;
 }
@@ -303,6 +308,59 @@ table.tile td div.shadowTop {
   height: calc(100% - 78px);
 }
 
+#itemTooltip {
+  position: absolute;
+  z-index: 1000;
+  width: 125px;
+  opacity: 0.9;
+  filter: Alpha(Opacity=90);
+
+  border: 2px solid #fff;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.75);
+
+  color: #fff;
+  text-shadow: 1px 1px #000;
+  font-family: georgia, arial, helvetica, sans-serif;
+  font-size: 0.8em;
+  box-shadow: 2px 2px 4px #666;
+}
+
+#itemTooltipName {
+  padding: 0;
+  margin: 0;
+  height: 24px;
+  text-decoration: underline;
+  font-size: 1.2em;
+  line-height: 24px;
+}
+
+#itemMenu {
+  padding: 4px 0 0 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+#itemMenu li {
+  width: 100%;
+}
+
+#itemMenu a {
+  text-decoration: none;
+  display: block;
+  color: #eee;
+  background-color: #333;
+}
+
+#itemMenu a:link, #itemMenu a:visited {
+  color: #eee;
+}
+
+#itemMenu a:link:hover, #itemMenu a:visited:hover {
+  background-color: #444;
+  color: #eee;
+}
+
 #options {
   float: right;
   margin: 0;
@@ -324,6 +382,10 @@ img.itemListItem {
 
 .floatLeft {
   float: left;
+}
+
+.floatRight {
+  float: right;
 }
 
 .clearBoth {
@@ -357,6 +419,7 @@ button.big {
   height: 40px;
   font-size: 1.0em;
   font-weight: bold;
+  font-family: georgia, arial, helvetica, sans-serif;
   text-align: center;
   box-shadow: 0px 0px 8px #666;
   border: 1px solid #666;
@@ -369,6 +432,10 @@ input[type=checkbox] {
 
 .red {
   color: #f00;
+}
+
+.ui-widget {
+  font-family: georgia, arial, helvetica, sans-serif;
 }
 
 .ui-dialog {
@@ -385,10 +452,14 @@ input[type=checkbox] {
   box-shadow: 0px 0px 16px #666;
 }
 
+.ui-dialog.craftingDialog, .ui-dialog-buttonpane.craftingDialog {
+  background: #c6c6c6;
+}
+
 .ui-widget-overlay.override {
-    background: repeat-x scroll 50% 50% #000;
-    opacity: 0.5;
-    filter: Alpha(Opacity=50);
+  background: repeat-x scroll 50% 50% #000;
+  opacity: 0.5;
+  filter: Alpha(Opacity=50);
 }
 
 .ui-widget textarea.override {

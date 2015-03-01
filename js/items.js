@@ -263,4 +263,35 @@ Items.forEach(function(item)
 {
   item.image = item.image || "images/" + item.name + ".png";
   item.pluralSuffix = item.pluralSuffix || "";
+
+  if (item.recipe)
+  {
+    item.recipe.ingredients.forEach2d(function(ingredient)
+    {
+      if (!ingredient.item.usedBy)
+      {
+        ingredient.item.usedBy = [ item.name ];
+      }
+      else if ($.inArray(item.name, ingredient.item.usedBy) === -1)
+      {
+        // Keep usedBy array sorted by item id
+        var inserted = false;
+        for (var i = 0, length = ingredient.item.usedBy.length; i < length; i++)
+        {
+          var usedByItemId = Items.get(ingredient.item.usedBy[i]).id;
+          if (item.id < usedByItemId)
+          {
+            ingredient.item.usedBy.splice(i, 0, item.name);
+            inserted = true;
+            break;
+          }
+        }
+
+        if (!inserted)
+        {
+          ingredient.item.usedBy.push(item.name);
+        }
+      }
+    });
+  }
 });
