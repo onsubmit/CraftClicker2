@@ -1340,6 +1340,7 @@ function Game(args)
         maxHeight: 300,
         height: "auto",
         show: true,
+        position: { of: game.getMiddleColumn() },
         open: function(event, ui)
         {
           var overrides = ['.ui-dialog', '.ui-widget-overlay', '.ui-widget textarea' ];

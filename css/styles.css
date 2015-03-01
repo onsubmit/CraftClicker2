@@ -311,7 +311,7 @@ table.tile td div.shadowTop {
 #itemTooltip {
   position: absolute;
   z-index: 1000;
-  width: 125px;
+  width: 175px;
   opacity: 0.9;
   filter: Alpha(Opacity=90);
 
@@ -331,7 +331,7 @@ table.tile td div.shadowTop {
   margin: 0;
   height: 24px;
   text-decoration: underline;
-  font-size: 1.2em;
+  font-size: 1.8em;
   line-height: 24px;
 }
 
@@ -350,6 +350,10 @@ table.tile td div.shadowTop {
   display: block;
   color: #eee;
   background-color: #333;
+  height: 24px;
+  line-height: 24px;
+  font-size: 1.6em;
+  padding: 8px 0;
 }
 
 #itemMenu a:link, #itemMenu a:visited {

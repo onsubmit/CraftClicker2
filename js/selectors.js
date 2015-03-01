@@ -1,5 +1,9 @@
 $.extend(Game.prototype,
 {
+  getMiddleColumn: function()
+  {
+    return $("#middleColumn");
+  },
   getPlayer: function()
   {
     return $("#player");
