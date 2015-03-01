@@ -545,7 +545,7 @@ function Game(args)
     {
       game.getItemTooltipIcon().attr("src", e.data.item.image);
       game.getItemTooltipName().text(e.data.item.name);
-      game.getItemMenuRecipe().off("click").on("click", { item: e.data.item }, function(e2)
+      game.getItemMenuRecipe().off("click touchend").on("click touchend", { item: e.data.item }, function(e2)
       {
         game.getCraftingDialog().dialog("option", "title", "Recipe");
         game.getCraftingDialog().dialog("option", "buttons", 
@@ -594,7 +594,7 @@ function Game(args)
         game.drawCraftingDialog(e2.data.item);
       });
 
-      game.getItemMenuUses().off("click").on("click", { item: e.data.item }, function(e3)
+      game.getItemMenuUses().off("click touchend").on("click touchend", { item: e.data.item }, function(e3)
       {
         game.getCraftingDialog().dialog("option", "title", "Uses");
         if (e3.data.item.usedBy.length > 1)
