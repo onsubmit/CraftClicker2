@@ -268,11 +268,12 @@ Items.forEach(function(item)
   {
     item.recipe.ingredients.forEach2d(function(ingredient)
     {
+      item.recipe.level = Math.max(item.recipe.rows, item.recipe.cols);
       if (!ingredient.item.usedBy)
       {
         ingredient.item.usedBy = [ item.name ];
       }
-      else if ($.inArray(item.name, ingredient.item.usedBy) === -1)
+      else if (!ingredient.item.usedBy.contains(item.name))
       {
         // Keep usedBy array sorted by item id
         var inserted = false;

@@ -33,6 +33,14 @@ if (!String.prototype.trimEnd)
   }
 }
 
+if (!Array.prototype.contains)
+{
+  Array.prototype.contains = function(item)
+  {
+    return ($.inArray(item, this) !== -1);
+  }
+}
+
 if (!Array.prototype.assignEach)
 {
   Array.prototype.assignEach = function(f)
@@ -63,7 +71,7 @@ if (!Array.prototype.pushUnique)
 {
   Array.prototype.pushUnique = function(item)
   {
-    return this.pushIf($.inArray(item, this) === -1, item);
+    return this.pushIf(!this.contains(item), item);
   }
 }
 

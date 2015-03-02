@@ -281,17 +281,28 @@ function Game(args)
         arrDrops.forEach(function(drop)
         {
           // Unlock items the drop unlocks
-          if (fRecurse && drop.item.unlocks)
+          if (fRecurse && drop.item.unlocks && drop.item.unlocks.length)
           {
-            var unlocks = drop.item.unlocks.map(function(unlockedItemName) { return { item: Items.get(unlockedItemName) }; });
-            game.unlockNewItems(unlocks);
-            drop.item.unlocks = undefined;
+            var availableUnlocks = [];
+            for (var i = 0; i < drop.item.unlocks.length; i++)
+            {
+              var unlockedItem = drop.item.unlocks[i];
+              if (!unlockedItem.recipe || unlockedItem.recipe.level <= game.craftingLevel)
+              {
+                availableUnlocks.push({ item: Items.get(drop.item.unlocks.splice(i--, 1)) });
+              }
+            };
+
+            if (availableUnlocks.length)
+            {
+              game.unlockNewItems(availableUnlocks);
+            }
           }
 
           // Add any newly discovered drops to the list of unlocked items
           game.unlockedItems.pushIf((function()
           {
-            var itemNotYetUnlocked = ($.inArray(drop.item.name, game.unlockedItems) === -1);
+            var itemNotYetUnlocked = !game.unlockedItems.contains(drop.item.name);
             if (itemNotYetUnlocked)
             {
               newItemsToDraw.push(drop.item);
@@ -545,61 +556,76 @@ function Game(args)
     {
       game.getItemTooltipIcon().attr("src", e.data.item.image);
       game.getItemTooltipName().text(e.data.item.name);
+
+      var craftButtonClick = function(event, $dialog)
+      {
+        var size = Math.max(event.data.item.recipe.ingredients.length, event.data.item.recipe.ingredients[0].length);
+        if (size <= game.craftingLevel)
+        {
+          // TODO: IMPLEMENT THIS
+          /*
+          var $table = game.getCraftingTable();
+          for (var row = 0; row < size; row++)
+          {
+            var $tr = $("<tr/>");
+            for (var col = 0; col < size; col++)
+            {
+              var $td = $("<td/>");
+              $td.attr("data-cpos", row + "," + col);
+
+              var ingredient = drawOutput.recipe.ingredients[row][col];
+              if (ingredient)
+              {
+                $td.append($("<div/>").append(game.generateItemImage(ingredient.item)));
+              }
+              
+              $tr.append($td);
+            }
+
+            $table.append($tr);
+          }
+          */
+        }
+
+        $dialog.dialog("close");
+      };
+
+      var craftButton = 
+      {
+        text: "Craft",
+        icons:
+        {
+          primary: "ui-icon-wrench"
+        }
+      };
+
       game.getItemMenuRecipe().off("click touchend").on("click touchend", { item: e.data.item }, function(e2)
       {
-        game.getCraftingDialog().dialog("option", "title", "Recipe");
-        game.getCraftingDialog().dialog("option", "buttons", 
-        [
-          {
-            text: "Craft",
-            icons:
-            {
-              primary: "ui-icon-transferthick-e-w"
-            },
-            click: function()
-            {
-              var size = Math.max(e.data.item.recipe.ingredients.length, e.data.item.recipe.ingredients[0].length);
-              if (size <= game.craftingLevel)
-              {
-                // TODO: IMPLEMENT THIS
-                /*
-                var $table = game.getCraftingTable();
-                for (var row = 0; row < size; row++)
-                {
-                  var $tr = $("<tr/>");
-                  for (var col = 0; col < size; col++)
-                  {
-                    var $td = $("<td/>");
-                    $td.attr("data-cpos", row + "," + col);
+        game.getCraftingDialog().dialog("option", "title", "Recipe \u2014 " + e.data.item.name);
 
-                    var ingredient = drawOutput.recipe.ingredients[row][col];
-                    if (ingredient)
-                    {
-                      $td.append($("<div/>").append(game.generateItemImage(ingredient.item)));
-                    }
-                    
-                    $tr.append($td);
-                  }
-
-                  $table.append($tr);
-                }
-                */
-              }
-
-              $(this).dialog("close");
-            }
-          }
-        ]);
-
+        var recipeCraftButton = $.extend({}, craftButton);
+        recipeCraftButton.click = function() { craftButtonClick(e2, $(this)) };
+        game.getCraftingDialog().dialog("option", "buttons", [ recipeCraftButton ]);
         game.drawCraftingDialog(e2.data.item);
       });
 
       game.getItemMenuUses().off("click touchend").on("click touchend", { item: e.data.item }, function(e3)
       {
-        game.getCraftingDialog().dialog("option", "title", "Uses");
-        if (e3.data.item.usedBy.length > 1)
+        game.getCraftingDialog().dialog("option", "title", "Uses \u2014 " + e3.data.item.name);
+
+        var usesCraftButton = $.extend({}, craftButton);
+        usesCraftButton.click = function() { craftButtonClick(e3, $(this)) };
+
+        var availableUsedBy = e3.data.item.usedBy.filter(function(used)
         {
-          game.getCraftingDialog().dialog("option", "buttons", 
+          var usedByItem = Items.get(used);
+          return usedByItem.recipe.level <= game.craftingLevel && game.unlockedItems.contains(usedByItem.name);
+        });
+
+        var usesCraftButtons = [];
+        if (availableUsedBy.length > 1)
+        {
+          usesCraftButtons =
           [
             {
               text: "Previous",
@@ -610,7 +636,7 @@ function Game(args)
               click: function()
               {
                 var useIndex = (parseInt(game.getCraftingDialogUseIndex().text()) || 1) - 1;
-                game.drawCraftingDialog(e3.data.item, useIndex - 1 /* iUseIndex */);
+                game.drawCraftingDialog(e3.data.item, availableUsedBy, useIndex - 1 /* iUseIndex */);
               }
             },
             {
@@ -625,14 +651,11 @@ function Game(args)
                 game.drawCraftingDialog(e3.data.item, useIndex + 1 /* iUseIndex */);
               }
             }
-          ]);
+          ];
         }
-        else
-        {
-          game.getCraftingDialog().dialog("option", "buttons", []);
-        }
-
-
+        
+        usesCraftButtons.push(usesCraftButton);
+        game.getCraftingDialog().dialog("option", "buttons", usesCraftButtons);
         game.drawCraftingDialog(e3.data.item, 0 /* iUseIndex */);
       });
 
@@ -657,7 +680,7 @@ function Game(args)
       }
 
       var areBothMenuItemsHidden = true;
-      if (e.data.item.recipe)
+      if (e.data.item.recipe && e.data.item.recipe.level <= game.craftingLevel)
       {
         areBothMenuItemsHidden = false;
         game.getItemMenuRecipe().show();
@@ -669,8 +692,21 @@ function Game(args)
 
       if (e.data.item.usedBy)
       {
-        areBothMenuItemsHidden = false;
-        game.getItemMenuUses().show();
+        var availableUsedBy = e.data.item.usedBy.filter(function(used)
+        {
+          var usedByItem = Items.get(used);
+          return usedByItem.recipe.level <= game.craftingLevel && game.unlockedItems.contains(usedByItem.name);
+        });
+
+        if (availableUsedBy.length)
+        {
+          areBothMenuItemsHidden = false;
+          game.getItemMenuUses().show();
+        }
+        else
+        {
+          game.getItemMenuUses().hide();
+        }
       }
       else
       {
@@ -725,8 +761,14 @@ function Game(args)
           iUseIndex = 0;
         }
 
-        drawOutput = Items.get(item.usedBy[iUseIndex]);
+        var availableUsedBy = item.usedBy.map(function(used)
+        {
+          var usedByItem = Items.get(used);
+          return usedByItem.size <= game.craftingLevel && !usedByItem.hidden;
+        });
 
+
+        drawOutput = Items.get(item.usedBy[iUseIndex]);
         var $useIndex = game.getCraftingDialogUseIndex();
         if (!$useIndex.length)
         {
@@ -740,11 +782,11 @@ function Game(args)
 
         if (item.usedBy.length !== 1)
         {
-          game.getCraftingDialog().dialog("option", "title", "Uses \u2014 Page " + (iUseIndex + 1) + " of " + item.usedBy.length);
+          game.getCraftingDialog().dialog("option", "title", "Uses \u2014 " + item.name + " \u2014 Page " + (iUseIndex + 1) + " of " + item.usedBy.length);
         }
       }
 
-      var size = Math.max(drawOutput.recipe.ingredients.length, drawOutput.recipe.ingredients[0].length);
+      var size = drawOutput.recipe.level;
       for (var row = 0; row < size; row++)
       {
         var $tr = $("<tr/>");
@@ -757,6 +799,10 @@ function Game(args)
           if (ingredient)
           {
             $td.append($("<div/>").append(game.generateItemImage(ingredient.item)));
+          }
+          else
+          {
+            $td.append($("<div/>"));
           }
           
           $tr.append($td);
@@ -1137,11 +1183,20 @@ function Game(args)
           game.player.inventory.merge(arrDrops);
         }
 
-        if (e.data.craftableItem.item.unlocks)
+        if (e.data.craftableItem.item.unlocks && e.data.craftableItem.item.unlocks.length)
         {
-          var unlocks = e.data.craftableItem.item.unlocks.map(function(unlockedItemName) { return { item: Items.get(unlockedItemName) }; });
-          game.unlockNewItems(unlocks);
-          e.data.craftableItem.item.unlocks = undefined;
+          var availableUnlocks = [];
+          for (var i = 0; i < e.data.craftableItem.item.unlocks.length; i++)
+          {
+            var unlockedItem = Items.get(e.data.craftableItem.item.unlocks[i]);
+            if (unlockedItem.recipe.level <= game.craftingLevel)
+            {
+              e.data.craftableItem.item.unlocks.splice(i--, 1);
+              availableUnlocks.push({ item: unlockedItem });
+            }
+          };
+
+          game.unlockNewItems(availableUnlocks);
         }
         
         game.drawInventory(arrDrops);
@@ -1288,9 +1343,6 @@ function Game(args)
           $(table).append($tr.fadeIn());
         }
       }
-
-      // Center the crafting arrow.
-      game.getCraftingAction().css("padding-top", (level - 1) * 17);
     },
     setupButtons: function()
     {
@@ -1371,7 +1423,7 @@ function Game(args)
       }));
 
       this.getOptionsDialog().dialog($.extend({}, commonDialogOptions, { resizable: false, modal: true }));
-      var craftingDialogOptions = $.extend({}, commonDialogOptions, { height: 300 });
+      var craftingDialogOptions = $.extend({}, commonDialogOptions, { height: "auto" });
       craftingDialogOptions.open = function (event, ui)
       {
         commonDialogOptions.open(event, ui);
@@ -1501,6 +1553,11 @@ $(document).ready(function()
   setupOnMineMethods();
 
   load(false /* prompt*/, null /* saveData */);
+  game.unlockedItems.sort(function(a, b)
+  {
+    return Items.get(a).id - Items.get(b).id;
+  });
+
   game.drawItems();
   game.drawCraftingArea();
   game.setupButtons();

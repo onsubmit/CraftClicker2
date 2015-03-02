@@ -34,10 +34,14 @@ h1, h2, h3, h4, h5, h6, p {
   padding-bottom: 10px;
 }
 
+#craftingDialogTableContainer {
+    display: table;
+    margin: 0 auto;
+}
+
 #craftingTable, #craftingDialogTable {
   empty-cells: show;
   border-spacing: 0px;
-  float: left;
 }
 
 #craftingTable td, #craftingDialogTable td, td.craftingCell {
@@ -72,16 +76,6 @@ div.accept, div#craftingOutput, div #craftingDialogOutput {
   background-color: transparent;
   border: 0;
   text-shadow: 1px 1px #000;
-}
-
-#craftArrow {
-  padding: 0px 5px 0 5px;
-  float: left;
-}
-
-#craftDialogArrow {
-  padding: 10px 5px 0 5px;
-  float: left;
 }
 
 #craftingOutputTable, #craftingDialogOutputTable {

@@ -27,23 +27,29 @@
     <div id="leftColumn">
       <div id="inventory" class="window">
         <div id="craftingContainer">
-          <table id="craftingTable"></table>
-          <div id="craftingAction">
-            <div id="craftArrow">
-              <button id="clearCraft">x</button><br />
-              <img src="images/ArrowRight.png" />
-            </div>
-            <table id="craftingOutputTable">
-              <tr>
-                <td class="craftingCell"><div id="craftingOutput"></div></td>
-                <td>
-                  <div id="craftingTakeContainer">
-                    <input id="craftingTakeAmount" value="1" readonly="readonly"/>
-                  </div>
-                </td>
-              </tr>
-            </table>
-          </div>
+          <table>
+            <tr>
+              <td>
+                <table id="craftingTable"></table>
+              </td>
+              <td style="vertical-align: middle">
+                <button id="clearCraft">x</button><br />
+                <img src="images/ArrowRight.png" />
+              </td>
+              <td>
+                <table id="craftingOutputTable">
+                  <tr>
+                    <td class="craftingCell"><div id="craftingOutput"></div></td>
+                    <td>
+                      <div id="craftingTakeContainer">
+                        <input id="craftingTakeAmount" value="1" readonly="readonly"/>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
           <div class="clearBoth"></div>
         </div>
         <div id="inventoryContainer" class="clearBoth">
@@ -60,7 +66,7 @@
         <button id="options" class="big"><u>O</u>ptions</button>
       </div>
       <div id="itemTooltip">
-        <img id="itemTooltipIcon" class="floatRight" />
+        <img id="itemTooltipIcon" class="floatLeft" />
         <p id="itemTooltipName"></p>
         <ul id="itemMenu">
           <li id="itemMenuRecipe"><a href="#">Recipe</a></li>
@@ -96,14 +102,22 @@
       </div>
     </div>
     <div id="craftingDialog">
-      <table id="craftingDialogTable"></table>
-      <div id="craftingDialogAction">
-        <div id="craftDialogArrow">
-          <img src="images/ArrowRight.png" />
-        </div>
-        <table id="craftingDialogOutputTable">
+      <div id="craftingDialogTableContainer">
+        <table>
           <tr>
-            <td class="craftingCell"><div id="craftingDialogOutput"></div></td>
+            <td>
+              <table id="craftingDialogTable"></table>
+            </td>
+            <td style="vertical-align: middle">
+              <img src="images/ArrowRight.png" />
+            </td>
+            <td>
+              <table id="craftingDialogOutputTable">
+                <tr>
+                  <td class="craftingCell"><div id="craftingDialogOutput"></div></td>
+                </tr>
+              </table>
+            </td>
           </tr>
         </table>
       </div>
