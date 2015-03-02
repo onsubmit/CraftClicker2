@@ -57,7 +57,7 @@ h1, h2, h3, h4, h5, h6, p {
   border-bottom: 2px solid #fff;
 }
 
-div.accept, div#craftingOutput, div #craftingDialogOutput {
+div.accept, div#craftingOutput, div #craftingDialogOutput, #craftingDialogTable td div {
   width: 24px;
   height: 24px;
   min-width: 24px;
