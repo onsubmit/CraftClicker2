@@ -57,7 +57,7 @@ h1, h2, h3, h4, h5, h6, p {
   border-bottom: 2px solid #fff;
 }
 
-div.accept, div#craftingOutput, div #craftingDialogOutput, #craftingDialogTable td div {
+div.accept, div#craftingOutput, div #craftingDialogOutput {
   width: 24px;
   height: 24px;
   min-width: 24px;
@@ -305,12 +305,11 @@ table.tile td div.shadowTop {
 #itemTooltip {
   position: absolute;
   z-index: 1000;
-  width: 175px;
+  width: 200px;
   opacity: 0.9;
   filter: Alpha(Opacity=90);
 
   border: 2px solid #fff;
-  padding: 4px;
   background: rgba(0, 0, 0, 0.75);
 
   color: #fff;
@@ -321,12 +320,21 @@ table.tile td div.shadowTop {
 }
 
 #itemTooltipName {
-  padding: 0;
+  padding: 12px 8px 8px 8px;
   margin: 0;
-  height: 24px;
-  text-decoration: underline;
-  font-size: 1.8em;
+  font-weight: bold;
+  font-size: 24px;
+  vertical-align: middle;
   line-height: 24px;
+
+  background: rgba(0, 0, 0, 0.5);
+  border-bottom: 2px solid #000;
+}
+
+#itemTooltipIcon {
+  padding: 4px;
+  width: 32px;
+  height: 32px;
 }
 
 #itemMenu {
@@ -347,7 +355,7 @@ table.tile td div.shadowTop {
   height: 24px;
   line-height: 24px;
   font-size: 1.6em;
-  padding: 8px 0;
+  padding: 8px;
 }
 
 #itemMenu a:link, #itemMenu a:visited {
@@ -375,7 +383,9 @@ table.tile td div.shadowTop {
 }
 
 img.itemListItem {
-  margin: 4px;
+  margin: 8px;
+  width: 32px;
+  height: 32px;
 }
 
 .floatLeft {

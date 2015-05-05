@@ -353,10 +353,8 @@ function Game(args)
         this.getInventoryContainer().fadeIn();
       }
     },
-    drawInventoryItem: function($list, $item, item, amount)
+    generateInventoryIcon: function (item, amount, isDraggable)
     {
-      if (!$item.length)
-      {
         var $icon = $("<div/>", 
         {
           id: "invi" + item.id,
@@ -368,50 +366,62 @@ function Game(args)
             id: "inva" + item.id,
             class: "iconAmount"
           })
-        ).draggable({
-          containment: game.getLeftColumn(),
-          appendTo: game.getLeftColumn(),
-          snap: ".accept",
-          snapMode: "inner",
-          snapTolerance: 10,
-          distance: 10,
-          cursor: "move",
-          cursorAt: { bottom: -10, right: -10 },
-          helper: "clone",
-          opacity: 0.9,
-          scroll: false,
-          start: function(event, ui)
-          {
-            var $amount = $(ui.helper).find(".iconAmount");
-            
-            var doDragStacks = game.getIsInventoryMoveStacksChecked();
-            if (doDragStacks)
+        );
+
+        if (isDraggable)
+        {
+          $icon.draggable({
+            containment: game.getLeftColumn(),
+            appendTo: game.getLeftColumn(),
+            snap: ".accept",
+            snapMode: "inner",
+            snapTolerance: 10,
+            distance: 10,
+            cursor: "move",
+            cursorAt: { bottom: -10, right: -10 },
+            helper: "clone",
+            opacity: 0.9,
+            scroll: false,
+            start: function(event, ui)
             {
-              var currentAmount = parseInt($amount.text() || 1);
-              if (currentAmount < Items.stackSize)
+              var $amount = $(ui.helper).find(".iconAmount");
+              
+              var doDragStacks = game.getIsInventoryMoveStacksChecked();
+              if (doDragStacks)
               {
-                $amount.text(currentAmount);
+                var currentAmount = parseInt($amount.text() || 1);
+                if (currentAmount < Items.stackSize)
+                {
+                  $amount.text(currentAmount);
+                }
+                else
+                {
+                  $amount.text(Items.stackSize);
+                }
+
+                amount = Math.min(amount, Items.stackSize);
+                
               }
               else
               {
-                $amount.text(Items.stackSize);
+                $amount.text(1);
+                $amount.hide();
               }
-
-              amount = Math.min(amount, Items.stackSize);
-              
-            }
-            else
+            },
+            stop: function(event, ui)
             {
-              $amount.text(1);
-              $amount.hide();
+              // If 
             }
-          },
-          stop: function(event, ui)
-          {
-            // If 
-          }
-        });
+          });
+        }
 
+        return $icon;
+    },
+    drawInventoryItem: function($list, $item, item, amount)
+    {
+      if (!$item.length)
+      {
+        var $icon = game.generateInventoryIcon(item, amount, true);
         var $name = $("<div/>",
         {
           class: "invName",
@@ -562,29 +572,28 @@ function Game(args)
         var size = Math.max(event.data.item.recipe.ingredients.length, event.data.item.recipe.ingredients[0].length);
         if (size <= game.craftingLevel)
         {
-          // TODO: IMPLEMENT THIS
-          /*
-          var $table = game.getCraftingTable();
           for (var row = 0; row < size; row++)
           {
-            var $tr = $("<tr/>");
             for (var col = 0; col < size; col++)
             {
-              var $td = $("<td/>");
-              $td.attr("data-cpos", row + "," + col);
-
-              var ingredient = drawOutput.recipe.ingredients[row][col];
+              var $td = game.getCellFromCraftingTable(row, col);
+              var ingredient = event.data.item.recipe.ingredients[row][col];
               if (ingredient)
               {
-                $td.append($("<div/>").append(game.generateItemImage(ingredient.item)));
+                var $currentAmount = game.getInventoryItem(ingredient.item.id).find(".iconAmount");
+                if ($currentAmount.length)
+                {
+                  var currentAmount = parseInt($currentAmount.text() || 1);
+                  if (currentAmount >= ingredient.amount)
+                  {
+                    var $icon = game.getDroppedIcon(ingredient.item, ingredient.amount, $currentAmount, currentAmount);
+                    $(":first-child", $td).append($icon);
+                    game.checkRecipe();
+                  }
+                }
               }
-              
-              $tr.append($td);
             }
-
-            $table.append($tr);
           }
-          */
         }
 
         $dialog.dialog("close");
@@ -796,7 +805,13 @@ function Game(args)
           var ingredientRow = drawOutput.recipe.ingredients[row];
           if (ingredientRow && (ingredient = ingredientRow[col]))
           {
-            $td.append($("<div/>").append(game.generateItemImage(ingredient.item)));
+            var $icon = game.generateInventoryIcon(ingredient.item, ingredient.amount);
+            if (ingredient.amount > 1)
+            {
+              $icon.find(".iconAmount").text(game.getAmountForBadge(ingredient.amount));
+            }
+
+            $td.append($("<div/>").append($icon));
           }
           else
           {
@@ -809,8 +824,118 @@ function Game(args)
         $table.append($tr);
       }
 
-      game.getCraftingDialogOutput().empty().append($("<div/>").append(game.generateItemImage(drawOutput)));
+      var $icon = game.generateInventoryIcon(drawOutput, drawOutput.recipe.makes);
+      if (drawOutput.recipe.makes > 1)
+      {
+        $icon.find(".iconAmount").text(game.getAmountForBadge(drawOutput.recipe.makes));
+      }
+
+      game.getCraftingDialogOutput().empty().append($("<div/>").append($icon));
       game.getCraftingDialog().dialog("open");
+    },
+    getDroppedIcon: function (item, droppedAmount, $currentAmount, currentAmount)
+    {
+      if ($currentAmount)
+      {
+          var newAmount = currentAmount - droppedAmount;
+          game.player.inventory.consume(item, droppedAmount);
+
+          if (newAmount === 1)
+          {
+            $currentAmount.hide();
+          }
+          else if (newAmount === 0)
+          {
+            game.getInventoryItem(item.id).hide();
+          }
+          else if (newAmount < 0)
+          {
+            return;
+          }
+
+          $currentAmount.text(newAmount);
+      }
+
+      var $icon = $("<div/>",
+      {
+        id: "c" + item.id,
+        class: "iconImage crafting",
+        style: "background: url('" + item.image + "')"
+      })
+      .attr("data-item", item.name);
+
+      var $amount = $("<div/>",
+      {
+        id: "c" + item.id,
+        class: "iconAmount"
+      });
+
+      if (droppedAmount !== 1)
+      {
+        $amount.text(droppedAmount);
+      }
+
+      $icon.append($amount);
+
+      $icon.click({ item: item, $amount: $amount }, function(e)
+      {
+        var amount = parseInt(e.data.$amount.text() || 1);
+        if (amount === 1) return;
+
+        var newAmount = Math.floor(amount / 2);
+        e.data.$amount.text(newAmount);
+        var objReclaim = {};
+        objReclaim[e.data.item.id] = amount - newAmount;
+        game.reclaimIngredients(objReclaim);
+        game.checkRecipe();
+      });
+
+      $icon.draggable(
+      {
+        containment: game.getLeftColumn(),
+        snap: ".accept",
+        snapMode: "inner",
+        snapTolerance: 10,
+        distance: 5,
+        cursor: "move",
+        helper: "clone",
+        opacity: 0.9,
+        scroll: false,
+        start: function(event, ui)
+        {
+          $(event.target).hide();
+          $(ui.helper).removeClass("dropped");
+
+          // Prevent the player from dragging an ingredient in the crafting table
+          // to in-between two (or four) squares, which would duplicate the ingredient.
+          // This might be possible to handle, but would be quite complex.
+          $(".accept").droppable("option", "tolerance", "fit");
+        },
+        stop: function(event, ui)
+        {
+          $(event.target).remove();
+          $(".accept").droppable("option", "tolerance", "touch");
+          var $elClone = $(ui.helper);
+          if (!$elClone.hasClass("dropped"))
+          {
+            var itemName = $elClone.attr("data-item");
+            var item = Items.get(itemName);
+            var $amount = $elClone.find(".iconAmount");
+            var amount = parseInt($amount.text() || 1);
+
+            var objReclaim = {};
+            objReclaim[item.id] = amount;
+            game.reclaimIngredients(objReclaim);
+          }
+
+          $(ui.helper).remove();
+          game.checkRecipe();
+        }
+      });
+
+      $icon.addClass("dropped");
+
+      return $icon;
     },
     setupDropTargets: function($td)
     {
@@ -830,109 +955,25 @@ function Game(args)
           var $droppedAmount = $elClone.find(".iconAmount");
           var droppedAmount = parseInt($droppedAmount.text() || 1);
 
+
           if (wasFromInventory)
           {
             // This event fires for each matched drop target.
             // Ensure more than items that what the player has don't get dropped.
             var $currentAmount = $elDrug.find(".iconAmount");
             var currentAmount = parseInt($currentAmount.text() || 1);
-            var newAmount = currentAmount - droppedAmount;
-            game.player.inventory.consume(item, droppedAmount);
+            var $icon = game.getDroppedIcon(item, droppedAmount, $currentAmount, currentAmount);
 
-            if (newAmount === 1)
-            {
-              $currentAmount.hide();
-            }
-            else if (newAmount === 0)
-            {
-              game.getInventoryItem(item.id).hide();
-            }
-            else if (newAmount < 0)
+            if (!$icon)
             {
               return;
             }
-
-            $currentAmount.text(newAmount);
+          }
+          else
+          {
+            var $icon = game.getDroppedIcon(item, droppedAmount);
           }
 
-          var $icon = $("<div/>",
-          {
-            id: "c" + item.id,
-            class: "iconImage crafting",
-            style: "background: url('" + item.image + "')"
-          })
-          .attr("data-item", item.name);
-
-          var $amount = $("<div/>",
-          {
-            id: "c" + item.id,
-            class: "iconAmount"
-          });
-
-          if (droppedAmount !== 1)
-          {
-            $amount.text(droppedAmount);
-          }
-
-          $icon.append($amount);
-
-          $icon.click({ item: item, $amount: $amount }, function(e)
-          {
-            var amount = parseInt(e.data.$amount.text() || 1);
-            if (amount === 1) return;
-
-            var newAmount = Math.floor(amount / 2);
-            e.data.$amount.text(newAmount);
-            var objReclaim = {};
-            objReclaim[e.data.item.id] = amount - newAmount;
-            game.reclaimIngredients(objReclaim);
-            game.checkRecipe();
-          });
-
-          $icon.draggable(
-          {
-            containment: game.getLeftColumn(),
-            snap: ".accept",
-            snapMode: "inner",
-            snapTolerance: 10,
-            distance: 5,
-            cursor: "move",
-            helper: "clone",
-            opacity: 0.9,
-            scroll: false,
-            start: function(event, ui)
-            {
-              $(event.target).hide();
-              $(ui.helper).removeClass("dropped");
-
-              // Prevent the player from dragging an ingredient in the crafting table
-              // to in-between two (or four) squares, which would duplicate the ingredient.
-              // This might be possible to handle, but would be quite complex.
-              $(".accept").droppable("option", "tolerance", "fit");
-            },
-            stop: function(event, ui)
-            {
-              $(event.target).remove();
-              $(".accept").droppable("option", "tolerance", "touch");
-              var $elClone = $(ui.helper);
-              if (!$elClone.hasClass("dropped"))
-              {
-                var itemName = $elClone.attr("data-item");
-                var item = Items.get(itemName);
-                var $amount = $elClone.find(".iconAmount");
-                var amount = parseInt($amount.text() || 1);
-
-                var objReclaim = {};
-                objReclaim[item.id] = amount;
-                game.reclaimIngredients(objReclaim);
-              }
-
-              $(ui.helper).remove();
-              game.checkRecipe();
-            }
-          });
-
-          $icon.addClass("dropped");
           $(ui.helper).addClass("dropped");
 
           // TODO: Clean this up
